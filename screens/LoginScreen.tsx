@@ -22,7 +22,7 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     try {
       // Simulate API login call
-      const response = await fetch("http://192.168.1.153:3000/auth/login", {
+      const response = await fetch("http://192.168.1.4:3000/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
