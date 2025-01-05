@@ -20,6 +20,8 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
 
   // Handle submit logic
   const handleSubmit = () => {
+    navigation.navigate('Questionnaire', { productId, surveyId });
+    
     fetch('https://api.example.com/submitPreSurvey', {
       method: 'POST',
       headers: {

@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import LottieView from 'lottie-react-native'; // Import Lottie for animation
 import HomeScreen from './screens/HomeScreen';
 import SurveyDetailsScreen from './screens/SurveyDetailsScreen';
+import QuestionnaireScreen from './screens/QuestionnaireScreen';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -51,6 +52,7 @@ const App = () => {
           >
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="SurveyDetails" component={SurveyDetailsScreen} />
+            <Stack.Screen name="Questionnaire" component={QuestionnaireScreen} />
           </Stack.Navigator>
 
           {/* Footer added here */}
