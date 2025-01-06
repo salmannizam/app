@@ -1,66 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Button, TextInput, Image, TouchableOpacity } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { Picker } from '@react-native-picker/picker';
+import { ScrollView, Alert, Image, View, StyleSheet } from 'react-native';
+import { Text, Button, TextInput, Card } from 'react-native-paper';
+import { Picker } from '@react-native-picker/picker';  // Correct import
+import { TouchableOpacity } from 'react-native';
 
-const QuestionnaireScreen = ({ route }: any) => {
-  const { productId, surveyId } = route.params;
+const QuestionnaireScreen = () => {
   const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<any[]>([]);
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
-    const questionData = [
-      {
-        "QuestionID": 10033164,
-        "Question": "Please Select Brand",
-        "Questiontype": "Single Choice",
-        "Mandatory": "Yes",
-        "Choices": [
-          { "ChoiceText": "AHO" },
-          { "ChoiceText": "CP" },
-          { "ChoiceText": "GLC" },
-          { "ChoiceText": "HJ" },
-          { "ChoiceText": "HON" }
-        ]
-      },
-      {
-        "QuestionID": 10033168,
-        "Question": "UNIT CODE",
-        "Questiontype": "Matrix",
-        "Mandatory": "No",
-        "Matrixtype": "Drop Down",
-        "Choices": [
-          { "ChoiceText": "AL" },
-          { "ChoiceText": "BD" },
-          { "ChoiceText": "BH" },
-          { "ChoiceText": "BL" },
-          { "ChoiceText": "BM" },
-          { "ChoiceText": "BT" },
-          { "ChoiceText": "BU" },
-          { "ChoiceText": "ID" },
-          { "ChoiceText": "JK" },
-          { "ChoiceText": "LK" },
-          { "ChoiceText": "MB" },
-          { "ChoiceText": "NP" }
-        ]
-      },
-      {
-        "QuestionID": 10033169,
-        "Question": "Batch No.",
-        "Questiontype": "User Input",
-        "Mandatory": "No",
-        "Datatype": "Number"
-      },
-    ];
-    setQuestions(questionData);
-  }, [surveyId]);
+    const questionsData = require('../assets/questions.json');
+    setQuestions(questionsData);
+  }, []);
 
-  const handleAnswerChange = (questionId: string, answer: any) => {
+  const handleAnswerChange = (questionId: number, answer: any) => {
     setAnswers(prevAnswers => {
       const updatedAnswers = [...prevAnswers];
-      const existingAnswerIndex = updatedAnswers.findIndex((a: any) => a.QuestionID === questionId);
-      if (existingAnswerIndex !== -1) {
-        updatedAnswers[existingAnswerIndex].answer = answer;
+      const index = updatedAnswers.findIndex(a => a.QuestionID === questionId);
+      if (index !== -1) {
+        updatedAnswers[index].answer = answer;
       } else {
         updatedAnswers.push({ QuestionID: questionId, answer });
       }
@@ -68,130 +27,160 @@ const QuestionnaireScreen = ({ route }: any) => {
     });
   };
 
-  const handleImagePick = async (questionId: string) => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct enum usage
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      // Handle the updated result structure (assets array)
-      const imageUri = result.assets?.[0]?.uri;
-      if (imageUri) {
-        handleAnswerChange(questionId, imageUri);
-      }
+  const handleSubmitSurvey = () => {
+    if (answers.length === 0 || answers.some(a => !a.answer && questions.find(q => q.QuestionID === a.QuestionID).Mandatory === "Yes")) {
+      Alert.alert('Error', 'Please answer all mandatory questions before submitting.');
+      return;
     }
+
+    console.log("Survey answers submitted:", answers);
+    Alert.alert('Survey Submitted', 'Your answers have been successfully submitted.');
   };
 
-  const handleSubmit = () => {
-    fetch('https://api.example.com/submitSurvey', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, surveyId, answers }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert('Survey completed successfully');
-        } else {
-          alert('Failed to submit survey');
-        }
-      })
-      .catch(err => alert('Error submitting survey'));
+  const handleResetSurvey = () => {
+    setAnswers([]);
+    setImageUri(null);
+  };
+
+  const handleImageUpload = () => {
+    Alert.alert('Image Picker', 'Implement Image Picker Here');
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Survey Questions</Text>
+    <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+      <Text variant="headlineMedium" style={styles.title}>Survey Questions</Text>
+
       {questions.map((question) => (
-        <View key={question.QuestionID} style={styles.questionContainer}>
-          <Text style={styles.question}>{question.Question}</Text>
+        <Card key={question.QuestionID} style={styles.card}>
+          <Card.Content>
+            <Text variant="titleSmall" style={styles.question}>{question.Question}</Text>
 
-          {question.Questiontype === 'Single Choice' && question.Choices && (
-            <View>
-              {question.Choices.map((choice: { ChoiceText: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }, index: React.Key | null | undefined) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.choiceButton}
-                  onPress={() => handleAnswerChange(question.QuestionID, choice.ChoiceText)}>
-                  <Text>{choice.ChoiceText}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
+            {question.Questiontype === 'User Input' && (
+              <TextInput
+                style={styles.input}
+                label={`Enter ${question.Question}`}
+                keyboardType={question.Datatype === 'Number' ? 'numeric' : 'default'}
+                onChangeText={(text) => handleAnswerChange(question.QuestionID, text)}
+              />
+            )}
 
-          {question.Questiontype === 'Matrix' && question.Choices && (
-            <Picker
-              selectedValue={answers.find((a: any) => a.QuestionID === question.QuestionID)?.answer}
-              onValueChange={(itemValue) => handleAnswerChange(question.QuestionID, itemValue)}>
-              {question.Choices.map((choice: { ChoiceText: string | undefined; }, index: React.Key | null | undefined) => (
-                <Picker.Item key={index} label={choice.ChoiceText} value={choice.ChoiceText} />
-              ))}
-            </Picker>
-          )}
+            {question.Questiontype === 'Single Choice' && question.Choices && (
+              <View style={styles.choiceContainer}>
+                <Picker
+                  selectedValue={answers.find(a => a.QuestionID === question.QuestionID)?.answer || ''}
+                  onValueChange={(itemValue) => handleAnswerChange(question.QuestionID, itemValue)}
+                  style={styles.picker}
+                >
+                  {question.Choices.map((choice, index) => (
+                    <Picker.Item key={index} label={choice.ChoiceText} value={choice.ChoiceText} />
+                  ))}
+                </Picker>
+              </View>
+            )}
 
-          {question.Questiontype === 'User Input' && (
-            <TextInput
-              style={styles.input}
-              placeholder={`Enter ${question.Question}`}
-              onChangeText={(text) => handleAnswerChange(question.QuestionID, text)}
-            />
-          )}
+            {question.Questiontype === 'Matrix' && question.Choices && (
+              <Picker
+                selectedValue={answers.find(a => a.QuestionID === question.QuestionID)?.answer || ''}
+                onValueChange={(itemValue) => handleAnswerChange(question.QuestionID, itemValue)}
+                style={styles.picker}
+              >
+                {question.Choices.map((choice, index) => (
+                  <Picker.Item key={index} label={choice.ChoiceText} value={choice.ChoiceText} />
+                ))}
+              </Picker>
+            )}
 
-          {question.Questiontype === 'Image' && (
-            <View>
-              <Button title="Select Image" onPress={() => handleImagePick(question.QuestionID)} />
-              {answers.find((a: any) => a.QuestionID === question.QuestionID)?.answer && (
-                <Image
-                  source={{ uri: answers.find((a: any) => a.QuestionID === question.QuestionID)?.answer }}
-                  style={styles.image}
-                />
-              )}
-            </View>
-          )}
-        </View>
+            {question.Questiontype === 'Image' && (
+              <View style={styles.imageContainer}>
+                <Text variant="bodyMedium" style={styles.imageText}>Upload Image</Text>
+                {imageUri ? (
+                  <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+                ) : (
+                  <Text style={styles.imageText}>No image selected</Text>
+                )}
+                <Button icon="camera" mode="contained" onPress={handleImageUpload} style={styles.uploadButton}>
+                  Select Image
+                </Button>
+              </View>
+            )}
+          </Card.Content>
+        </Card>
       ))}
-      <Button title="Submit Survey" onPress={handleSubmit} />
-    </View>
+
+      <View style={styles.buttonContainer}>
+        <Button mode="outlined" onPress={handleResetSurvey} style={styles.button} color="#d9534f">
+          Reset
+        </Button>
+        <Button mode="contained" onPress={handleSubmitSurvey} style={styles.button} color="#5bc0de">
+          Submit Survey
+        </Button>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
+  scrollViewContainer: {
+    flexGrow: 1,
+    padding: 12,
+    paddingTop: 100,
+    paddingBottom:60
   },
   title: {
+    textAlign: 'center',
+    marginBottom: 20,
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
   },
-  questionContainer: {
-    marginBottom: 20,
+  card: {
+    marginBottom: 15,
+    borderRadius: 8,
+    padding: 8,
   },
   question: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  choiceButton: {
-    marginBottom: 5,
-    padding: 10,
-    backgroundColor: '#ddd',
-    borderRadius: 5,
+    fontSize: 16,
+    marginBottom: 12,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
+    marginBottom: 15,
+    fontSize: 14,
   },
-  image: {
-    width: 100,
-    height: 100,
+  choiceContainer: {
+    marginBottom: 15,
+  },
+  picker: {
+    fontSize: 14,
+    backgroundColor: '#f7f7f7',
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  imageText: {
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 14,
+  },
+  imagePreview: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  uploadButton: {
     marginTop: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginTop: 20,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+    marginBottom: 10,
   },
 });
 

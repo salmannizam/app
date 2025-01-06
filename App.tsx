@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -7,16 +7,16 @@ import LottieView from 'lottie-react-native'; // Import Lottie for animation
 import HomeScreen from './screens/HomeScreen';
 import SurveyDetailsScreen from './screens/SurveyDetailsScreen';
 import QuestionnaireScreen from './screens/QuestionnaireScreen';
+import Toast from 'react-native-toast-message';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
 
+// Footer Component (Optional)
 const Footer = () => {
   return (
     <View style={styles.footer}>
-      {/* Lottie Animation for a smooth footer interaction */}
       <TouchableOpacity style={styles.arrowContainer}>
-      {/* <Text style={styles.arrowAnimation}>↑</Text> */}
         <LottieView
           source={require('./assets/bg.json')} // Add your custom Lottie JSON file here
           autoPlay
@@ -28,6 +28,7 @@ const Footer = () => {
   );
 };
 
+// App Component
 const App = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -39,6 +40,7 @@ const App = () => {
               headerStyle: {
                 backgroundColor: '#1D3C6B', // Modern gradient header color
                 shadowOpacity: 0, // Removes shadow for a clean look
+                height: 100, // Set a specific height for the header if needed
               },
               headerTintColor: '#FFFFFF', // White text color
               headerTitle: 'Survey', // Set header title
@@ -58,6 +60,30 @@ const App = () => {
           {/* Footer added here */}
           <Footer />
         </View>
+
+        {/* Configure Toast with custom styles */}
+        <Toast
+          config={{
+            success: ({ text1, text2 }) => (
+              <View style={[styles.toast, styles.toastSuccess]}>
+                <Text style={styles.toastText}>{text1}</Text>
+                <Text style={styles.toastSubText}>{text2}</Text>
+              </View>
+            ),
+            error: ({ text1, text2 }) => (
+              <View style={[styles.toast, styles.toastError]}>
+                <Text style={styles.toastText}>{text1}</Text>
+                <Text style={styles.toastSubText}>{text2}</Text>
+              </View>
+            ),
+            info: ({ text1, text2 }) => (
+              <View style={[styles.toast, styles.toastInfo]}>
+                <Text style={styles.toastText}>{text1}</Text>
+                <Text style={styles.toastSubText}>{text2}</Text>
+              </View>
+            ),
+          }}
+        />
       </NavigationContainer>
     </GestureHandlerRootView>
   );
@@ -84,9 +110,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   arrowAnimation: {
-    color:"#FF6F61",
     width: 40, // Width of the animated arrow
     height: 40, // Height of the animated arrow
+  },
+  // Toast Styles
+  toast: {
+    padding: 16,
+    borderRadius: 8,
+    width: '95%', // Force full width
+    maxWidth: '95%', // Max width is 100% of the screen
+    alignSelf: 'center', // Center horizontally
+    marginHorizontal: 0, // Remove any margins
+    position: 'absolute', // Position it absolutely to the screen
+    top: 50, // Adjust the vertical position if needed
+  },
+  toastText: {
+    color: '#fff',  // Toast text color
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  toastSubText: {
+    color: '#fff', // Toast subtext color
+    fontSize: 14,
+    marginTop: 4,
+  },
+  toastSuccess: {
+    backgroundColor: '#4CAF50', // Green background for success
+  },
+  toastError: {
+    backgroundColor: '#FF6F61', // Red background for error
+  },
+  toastInfo: {
+    backgroundColor: '#1E90FF', // Blue background for info
   },
 });
 

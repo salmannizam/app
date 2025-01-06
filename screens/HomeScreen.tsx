@@ -3,6 +3,8 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert, ImageBackgr
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import axios from 'axios';
+import Toast from 'react-native-toast-message';
+import { validateProductId } from '../services/api'; // Import your validateProductId API
 
 // This type maps 'Home' and 'SurveyDetails' screens to their parameters
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SurveyDetails'>;
@@ -17,35 +19,50 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [productIdValid, setProductIdValid] = useState(true); // Track if product ID is valid
   const [surveyIdValid, setSurveyIdValid] = useState(true); // Track if survey ID is valid
 
-  const handleNavigate = () => {
-    if (productId && surveyId) {
-      // Prepare request body
-      const requestData = {
-        surveyId: surveyId,
-        productId: productId,
-      };
 
-      // API call using axios
-      axios
-        .post('http://192.168.1.4:3000/survey/validate-project', requestData)
-        .then((response) => {
-          // Assuming the response has a field `valid` to determine the validity
-          if (response.data.status == "success") {
-            // Navigate to SurveyDetails screen with productId and surveyId as params
-            navigation.navigate('SurveyDetails', { productId, surveyId });
-          } else {
-            setProductIdValid(false);
-            Alert.alert('Invalid Product ID', 'Please enter a valid Product ID.');
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          Alert.alert('Error', 'Error validating Product ID');
+  const handleNavigate = async () => {
+    navigation.navigate('SurveyDetails', { productId:11, surveyId:33 })
+    // Ensure both fields are filled before making the API call
+    if (productId && surveyId) {
+      try {
+        // Call the validateProductId API with the productId and surveyId
+        const response = await validateProductId(productId, surveyId);
+
+        // Check if the API response is successful
+        if (response.data.status == "success") {
+          // Navigate to SurveyDetails screen with productId and surveyId as params
+          navigation.navigate('SurveyDetails', { productId, surveyId });
+        } else {
+          setProductIdValid(false); // Mark productId as invalid
+          Toast.show({
+            type: 'error',
+            position: 'top',
+            text1: 'Invalid Product ID',
+            text2: 'Please enter a valid Product ID.',
+            visibilityTime: 3000,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Error',
+          text2: 'Error validating Product ID. Please try again.',
+          visibilityTime: 3000,
         });
+      }
     } else {
-      Alert.alert('Missing Fields', 'Please enter both Product ID and Survey ID');
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Missing Fields',
+        text2: 'Please enter both Product ID and Survey ID.',
+        visibilityTime: 3000,
+      });
     }
   };
+
 
   return (
     <ImageBackground
