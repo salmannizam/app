@@ -124,10 +124,10 @@ const QuestionnaireScreen = () => {
         }
         ListFooterComponent={
           <View style={styles.buttonContainer}>
-            <Button mode="outlined" onPress={handleResetSurvey} style={styles.button} color="#d9534f">
+            <Button mode="outlined" onPress={handleResetSurvey} style={styles.resetButton} color="#5bc0de">
               Reset
             </Button>
-            <Button mode="contained" onPress={handleSubmitSurvey} style={styles.submiButton} color="#5bc0de">
+            <Button mode="contained" onPress={handleSubmitSurvey} style={styles.submitButton} color="#5bc0de">
               Submit Survey
             </Button>
           </View>
@@ -207,7 +207,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     marginBottom: 10,
   },
-  submiButton: {
+  resetButton: {
+    flex: 1,
+    marginHorizontal: 5,
+    marginBottom: 10,
+    backgroundColor: '#FF6F61',
+  },
+  submitButton: {
     flex: 1,
     marginHorizontal: 5,
     marginBottom: 10,

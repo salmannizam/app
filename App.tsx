@@ -43,7 +43,7 @@ const App = () => {
                 height: 100, // Set a specific height for the header if needed
               },
               headerTintColor: '#FFFFFF', // White text color
-              headerTitle: 'Survey', // Set header title
+              // headerTitle: 'Survey', // Set header title
               headerTitleStyle: {
                 fontFamily: 'Arial', // Clean font for title
                 fontWeight: 'bold',
@@ -52,11 +52,12 @@ const App = () => {
               headerTransparent: true, // Semi-transparent header
             }}
           >
-            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Home"   component={HomeScreen}  options={{ headerTitle: 'Survey' }} />
             <Stack.Screen
               name="SurveyDetails"
               component={SurveyDetailsScreen}
               options={{
+                headerTitle: 'Survey Details' ,
                 animationEnabled: true, // Enables transition animations
                 gestureEnabled: true, // Allows swipe gestures for transition
                 cardStyleInterpolator: ({ current, next, index, routes }) => {
@@ -116,8 +117,10 @@ const App = () => {
                 
               }}
             />
-            <Stack.Screen name="Questionnaire" component={QuestionnaireScreen}               
+            <Stack.Screen name="Questionnaire" 
+            component={QuestionnaireScreen}   
                  options={{
+                  headerTitle: 'Questionnaire' ,
                   animationEnabled: true, // Enables transition animations
                   gestureEnabled: true, // Allows swipe gestures for transition
                   cardStyleInterpolator: ({ current, next, index, routes }) => {
