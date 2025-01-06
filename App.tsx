@@ -53,8 +53,130 @@ const App = () => {
             }}
           >
             <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="SurveyDetails" component={SurveyDetailsScreen} />
-            <Stack.Screen name="Questionnaire" component={QuestionnaireScreen} />
+            <Stack.Screen
+              name="SurveyDetails"
+              component={SurveyDetailsScreen}
+              options={{
+                animationEnabled: true, // Enables transition animations
+                gestureEnabled: true, // Allows swipe gestures for transition
+                cardStyleInterpolator: ({ current, next, index, routes }) => {
+                  // Ensure that routes is defined and has length
+                  const isBack = routes && index < routes.length - 1; // Check if routes is valid
+                
+                  // Handle Forward Transition
+                  if (!isBack) {
+                    return {
+                      cardStyle: {
+                        opacity: current.progress.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, 1], // Fade in as it moves
+                        }),
+                        transform: [
+                          {
+                            translateX: current.progress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [200, 0], // Slide from right to left
+                            }),
+                          },
+                          {
+                            scale: current.progress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0.5, 1], // Slight scaling effect
+                            }),
+                          },
+                        ],
+                      },
+                    };
+                  }
+                
+                  // Handle Backward Transition
+                  return {
+                    cardStyle: {
+                      opacity: current.progress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 0], // Fade out as it moves backward
+                      }),
+                      transform: [
+                        {
+                          translateX: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -600], // Slide from left to right (negative for back)
+                          }),
+                        },
+                        {
+                          scale: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [1, 0.9], // Slight scaling effect when going back
+                          }),
+                        },
+                      ],
+                    },
+                  };
+                },
+                
+              }}
+            />
+            <Stack.Screen name="Questionnaire" component={QuestionnaireScreen}               
+                 options={{
+                  animationEnabled: true, // Enables transition animations
+                  gestureEnabled: true, // Allows swipe gestures for transition
+                  cardStyleInterpolator: ({ current, next, index, routes }) => {
+                    // Ensure that routes is defined and has length
+                    const isBack = routes && index < routes.length - 1; // Check if routes is valid
+                  
+                    // Handle Forward Transition
+                    if (!isBack) {
+                      return {
+                        cardStyle: {
+                          opacity: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 1], // Fade in as it moves
+                          }),
+                          transform: [
+                            {
+                              translateX: current.progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [200, 0], // Slide from right to left
+                              }),
+                            },
+                            {
+                              scale: current.progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.5, 1], // Slight scaling effect
+                              }),
+                            },
+                          ],
+                        },
+                      };
+                    }
+                  
+                    // Handle Backward Transition
+                    return {
+                      cardStyle: {
+                        opacity: current.progress.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [1, 0], // Fade out as it moves backward
+                        }),
+                        transform: [
+                          {
+                            translateX: current.progress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0, -600], // Slide from left to right (negative for back)
+                            }),
+                          },
+                          {
+                            scale: current.progress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [1, 0.9], // Slight scaling effect when going back
+                            }),
+                          },
+                        ],
+                      },
+                    };
+                  },
+                  
+                }} 
+              />
           </Stack.Navigator>
 
           {/* Footer added here */}

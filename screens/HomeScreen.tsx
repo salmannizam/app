@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert, ImageBackground } from 'react-native';
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, ImageBackground, ActivityIndicator } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import axios from 'axios';
-import Toast from 'react-native-toast-message';
 import { validateProductId } from '../services/api'; // Import your validateProductId API
+import Toast from 'react-native-toast-message';
 
 // This type maps 'Home' and 'SurveyDetails' screens to their parameters
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SurveyDetails'>;
@@ -16,24 +15,20 @@ interface Props {
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [productId, setProductId] = useState('');
   const [surveyId, setSurveyId] = useState('');
-  const [productIdValid, setProductIdValid] = useState(true); // Track if product ID is valid
-  const [surveyIdValid, setSurveyIdValid] = useState(true); // Track if survey ID is valid
-
+  const [productIdValid, setProductIdValid] = useState(true);
+  const [surveyIdValid, setSurveyIdValid] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleNavigate = async () => {
-    navigation.navigate('SurveyDetails', { productId:11, surveyId:33 })
-    // Ensure both fields are filled before making the API call
+    navigation.navigate('SurveyDetails', { productId:1, surveyId:2 });
     if (productId && surveyId) {
+      setIsLoading(true);
       try {
-        // Call the validateProductId API with the productId and surveyId
         const response = await validateProductId(productId, surveyId);
-
-        // Check if the API response is successful
-        if (response.data.status == "success") {
-          // Navigate to SurveyDetails screen with productId and surveyId as params
+        if (response.data.status === "success") {
           navigation.navigate('SurveyDetails', { productId, surveyId });
         } else {
-          setProductIdValid(false); // Mark productId as invalid
+          setProductIdValid(false);
           Toast.show({
             type: 'error',
             position: 'top',
@@ -51,6 +46,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           text2: 'Error validating Product ID. Please try again.',
           visibilityTime: 3000,
         });
+      } finally {
+        setIsLoading(false);
       }
     } else {
       Toast.show({
@@ -63,45 +60,48 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-
   return (
-    <ImageBackground
-      // source={require('../assets/bg.png')} // Path to the image
-      style={styles.container} // Style the container to ensure the image covers the full screen
-    >
-      {/* Product ID Input with Label */}
+    <ImageBackground style={styles.container}>
+      {/* Product ID Input */}
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Product ID</Text>
         <TextInput
-          style={[styles.input, !productIdValid && styles.inputError]} // Apply error styling if invalid
+          style={[styles.input, !productIdValid && styles.inputError]}
           placeholder="Enter Product ID"
           placeholderTextColor="#888"
           value={productId}
           onChangeText={text => {
             setProductId(text);
-            setProductIdValid(true); // Reset error on text change
+            setProductIdValid(true);
           }}
         />
       </View>
 
-      {/* Survey ID Input with Label */}
+      {/* Survey ID Input */}
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Survey ID</Text>
         <TextInput
-          style={[styles.input, !surveyIdValid && styles.inputError]} // Apply error styling if invalid
+          style={[styles.input, !surveyIdValid && styles.inputError]}
           placeholder="Enter Survey ID"
           placeholderTextColor="#888"
           value={surveyId}
           onChangeText={text => {
             setSurveyId(text);
-            setSurveyIdValid(true); // Reset error on text change
+            setSurveyIdValid(true);
           }}
         />
       </View>
 
       {/* Proceed Button */}
-      <TouchableOpacity style={styles.button} onPress={handleNavigate}>
-        <Text style={styles.buttonText}>Proceed</Text>
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={handleNavigate} 
+        disabled={isLoading}>
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Proceed</Text>
+        )}
       </TouchableOpacity>
     </ImageBackground>
   );
@@ -134,16 +134,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   inputError: {
-    borderColor: '#E74C3C', // Red border color for invalid input
+    borderColor: '#E74C3C',
   },
   button: {
     width: '80%',
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#4CAF50', // Green color for proceed button
+    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2, // Add shadow for Android
+    elevation: 2,
     marginTop: 30,
   },
   buttonText: {
