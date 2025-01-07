@@ -58,11 +58,11 @@ const App = () => {
               component={SurveyDetailsScreen}
               options={{
                 headerTitle: 'Survey Details' ,
-                animationEnabled: true, // Enables transition animations
+                // animationEnabled: true, // Enables transition animations
                 gestureEnabled: true, // Allows swipe gestures for transition
-                cardStyleInterpolator: ({ current, next, index, routes }) => {
-                  // Ensure that routes is defined and has length
-                  const isBack = routes && index < routes.length - 1; // Check if routes is valid
+                cardStyleInterpolator: ({ current, next, index }) => {
+                  // Determine if the transition is backward
+                  const isBack = index < 0; // Adjust this logic as needed
                 
                   // Handle Forward Transition
                   if (!isBack) {
@@ -121,11 +121,11 @@ const App = () => {
             component={QuestionnaireScreen}   
                  options={{
                   headerTitle: 'Questionnaire' ,
-                  animationEnabled: true, // Enables transition animations
+                  // animationEnabled: true, // Enables transition animations
                   gestureEnabled: true, // Allows swipe gestures for transition
-                  cardStyleInterpolator: ({ current, next, index, routes }) => {
-                    // Ensure that routes is defined and has length
-                    const isBack = routes && index < routes.length - 1; // Check if routes is valid
+                  cardStyleInterpolator: ({ current, next, index }) => {
+                    // Determine if the transition is backward
+                    const isBack = index < 0; // Adjust this logic as needed
                   
                     // Handle Forward Transition
                     if (!isBack) {

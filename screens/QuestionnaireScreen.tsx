@@ -50,9 +50,9 @@ const QuestionnaireScreen = () => {
   };
 
   const handleImageUpload = () => {
-    ImagePicker.launchImageLibrary({}, (response) => {
-      if (response.uri) {
-        setImageUri(response.uri);
+    ImagePicker.launchImageLibrary({ mediaType: 'photo' }, (response) => {
+      if (response.assets && response.assets.length > 0) {
+        setImageUri(response.assets[0].uri || null);
       } else {
         setSnackbarMessage('Image selection failed!');
         setOpenSnackbar(true);
@@ -89,8 +89,9 @@ const QuestionnaireScreen = () => {
                 value: choice.ChoiceText,
               }))}
               setValue={(itemValue) => handleAnswerChange(question.QuestionID, itemValue)}
-              setOpen={(open) => setOpenDropdown(prevState => ({ ...prevState, [question.QuestionID]: open }))}
               containerStyle={styles.pickerContainer}
+              setOpen={(callback: (prevState: boolean) => boolean) => setOpenDropdown(prevState => ({ ...prevState, [question.QuestionID]: callback(prevState[question.QuestionID] || false) }))}
+            
             />
           </View>
         )}

@@ -20,7 +20,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleNavigate = async () => {
-    navigation.navigate('SurveyDetails', { productId:1, surveyId:2 });
+    navigation.navigate('SurveyDetails', { productId: '1', surveyId: '2' });
     if (productId && surveyId) {
       setIsLoading(true);
       try {

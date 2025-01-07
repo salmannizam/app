@@ -41,8 +41,6 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
             text1: 'Submission Failed',
             text2: 'Please try again later.',
             visibilityTime: 3000,
-            style: { backgroundColor: 'red' },
-            textStyle: { color: 'white' },
           });
         }
       } catch (err) {
@@ -54,8 +52,6 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
           text1: 'Submission Failed',
           text2: 'An error occurred. Please try again.',
           visibilityTime: 3000,
-          style: { backgroundColor: 'red' },
-          textStyle: { color: 'white' },
         });
       }
     } else {

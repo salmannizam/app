@@ -24,6 +24,7 @@ interface PreSurveyDetails {
 interface ApiResponse {
   success: boolean;
   message: string;
+  status: string; 
 }
 
 // Add request interceptors to add headers (for example, Authorization)
