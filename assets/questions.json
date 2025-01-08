@@ -92,6 +92,13 @@
       "Questiontype": "Single Choice",
       "Mandatory": "No",
       "Matrixtype": "",
+      "Choices": [
+        {
+          "ChoiceText": "yes"
+        },
+        {
+          "ChoiceText": "no"
+        }],
       "Datatype": ""
     },
     {

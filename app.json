@@ -16,6 +16,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.yourcompany.surveyapp",
       "infoPlist": {
+        "NSCameraUsageDescription": "We need your permission to use the camera.",
+        "NSPhotoLibraryUsageDescription": "We need your permission to access your photo library.",
+        "NSPhotoLibraryAddUsageDescription": "We need your permission to save photos to your library.",
         "UIBackgroundModes": ["fetch", "remote-notification"]
       }
     },
@@ -23,14 +26,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-        
       },
-      "permissions": []
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-    ]
+    "plugins": []
   }
 }

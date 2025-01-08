@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -12,18 +18,20 @@ import Toast from 'react-native-toast-message';
 // Create the Stack Navigator
 const Stack = createStackNavigator();
 
-// Footer Component (Optional)
+// Footer Component
 const Footer = () => {
   return (
     <View style={styles.footer}>
-      <TouchableOpacity style={styles.arrowContainer}>
-        <LottieView
-          source={require('./assets/bg.json')} // Add your custom Lottie JSON file here
-          autoPlay
-          loop
-          style={styles.arrowAnimation}
-        />
-      </TouchableOpacity>
+      <View style={styles.iconWrapper}>
+        <TouchableOpacity style={styles.iconContainer}>
+          <LottieView
+            source={require('./assets/bg.json')} // Add your custom Lottie JSON file here
+            autoPlay
+            loop
+            style={styles.iconAnimation}
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -52,18 +60,18 @@ const App = () => {
               headerTransparent: true, // Semi-transparent header
             }}
           >
-            <Stack.Screen name="Home"   component={HomeScreen}  options={{ headerTitle: 'Survey' }} />
+            <Stack.Screen name="Home" component={HomeScreen} options={{ headerTitle: 'Survey' }} />
             <Stack.Screen
               name="SurveyDetails"
               component={SurveyDetailsScreen}
               options={{
-                headerTitle: 'Survey Details' ,
+                headerTitle: 'Survey Details',
                 // animationEnabled: true, // Enables transition animations
                 gestureEnabled: true, // Allows swipe gestures for transition
                 cardStyleInterpolator: ({ current, next, index }) => {
                   // Determine if the transition is backward
                   const isBack = index < 0; // Adjust this logic as needed
-                
+
                   // Handle Forward Transition
                   if (!isBack) {
                     return {
@@ -89,7 +97,7 @@ const App = () => {
                       },
                     };
                   }
-                
+
                   // Handle Backward Transition
                   return {
                     cardStyle: {
@@ -114,72 +122,72 @@ const App = () => {
                     },
                   };
                 },
-                
+
               }}
             />
-            <Stack.Screen name="Questionnaire" 
-            component={QuestionnaireScreen}   
-                 options={{
-                  headerTitle: 'Questionnaire' ,
-                  // animationEnabled: true, // Enables transition animations
-                  gestureEnabled: true, // Allows swipe gestures for transition
-                  cardStyleInterpolator: ({ current, next, index }) => {
-                    // Determine if the transition is backward
-                    const isBack = index < 0; // Adjust this logic as needed
-                  
-                    // Handle Forward Transition
-                    if (!isBack) {
-                      return {
-                        cardStyle: {
-                          opacity: current.progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, 1], // Fade in as it moves
-                          }),
-                          transform: [
-                            {
-                              translateX: current.progress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [200, 0], // Slide from right to left
-                              }),
-                            },
-                            {
-                              scale: current.progress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0.5, 1], // Slight scaling effect
-                              }),
-                            },
-                          ],
-                        },
-                      };
-                    }
-                  
-                    // Handle Backward Transition
+            <Stack.Screen name="Questionnaire"
+              component={QuestionnaireScreen}
+              options={{
+                headerTitle: 'Questionnaire',
+                // animationEnabled: true, // Enables transition animations
+                gestureEnabled: true, // Allows swipe gestures for transition
+                cardStyleInterpolator: ({ current, next, index }) => {
+                  // Determine if the transition is backward
+                  const isBack = index < 0; // Adjust this logic as needed
+
+                  // Handle Forward Transition
+                  if (!isBack) {
                     return {
                       cardStyle: {
                         opacity: current.progress.interpolate({
                           inputRange: [0, 1],
-                          outputRange: [1, 0], // Fade out as it moves backward
+                          outputRange: [0, 1], // Fade in as it moves
                         }),
                         transform: [
                           {
                             translateX: current.progress.interpolate({
                               inputRange: [0, 1],
-                              outputRange: [0, -600], // Slide from left to right (negative for back)
+                              outputRange: [200, 0], // Slide from right to left
                             }),
                           },
                           {
                             scale: current.progress.interpolate({
                               inputRange: [0, 1],
-                              outputRange: [1, 0.9], // Slight scaling effect when going back
+                              outputRange: [0.5, 1], // Slight scaling effect
                             }),
                           },
                         ],
                       },
                     };
-                  },
-                  
-                }} 
-              />
+                  }
+
+                  // Handle Backward Transition
+                  return {
+                    cardStyle: {
+                      opacity: current.progress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 0], // Fade out as it moves backward
+                      }),
+                      transform: [
+                        {
+                          translateX: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -600], // Slide from left to right (negative for back)
+                          }),
+                        },
+                        {
+                          scale: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [1, 0.9], // Slight scaling effect when going back
+                          }),
+                        },
+                      ],
+                    },
+                  };
+                },
+
+              }}
+            />
           </Stack.Navigator>
 
           {/* Footer added here */}
@@ -218,7 +226,7 @@ const App = () => {
 const styles = StyleSheet.create({
   footer: {
     backgroundColor: '#1D3C6B', // Footer dark gradient
-    paddingVertical: 1,
+    paddingVertical: 20,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
@@ -227,30 +235,40 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
   },
-  arrowContainer: {
-    padding: 10,
-    borderRadius: 50, // Rounded corners for button
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent background
+  iconWrapper: {
+    position: 'absolute',
+    top: -25, // Position the icon slightly above the footer
+    alignSelf: 'center',
+    zIndex: 2, // Ensure it is above the footer
+  },
+  iconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25, // Make the icon circular
+    backgroundColor: '#fff', // Background for the icon
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5, // For Android shadow
   },
-  arrowAnimation: {
-    width: 40, // Width of the animated arrow
-    height: 40, // Height of the animated arrow
+  iconAnimation: {
+    width: 40,
+    height: 40,
   },
   // Toast Styles
   toast: {
     padding: 16,
     borderRadius: 8,
     width: '95%', // Force full width
-    maxWidth: '95%', // Max width is 100% of the screen
     alignSelf: 'center', // Center horizontally
-    marginHorizontal: 0, // Remove any margins
     position: 'absolute', // Position it absolutely to the screen
     top: 50, // Adjust the vertical position if needed
   },
   toastText: {
-    color: '#fff',  // Toast text color
+    color: '#fff', // Toast text color
     fontSize: 16,
     fontWeight: 'bold',
   },
