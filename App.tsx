@@ -14,6 +14,7 @@ import HomeScreen from './screens/HomeScreen';
 import SurveyDetailsScreen from './screens/SurveyDetailsScreen';
 import QuestionnaireScreen from './screens/QuestionnaireScreen';
 import Toast from 'react-native-toast-message';
+import { PaperProvider } from 'react-native-paper';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -39,6 +40,8 @@ const Footer = () => {
 // App Component
 const App = () => {
   return (
+    <PaperProvider>
+   
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <View style={{ flex: 1 }}>
@@ -219,6 +222,8 @@ const App = () => {
         />
       </NavigationContainer>
     </GestureHandlerRootView>
+       
+    </PaperProvider>
   );
 };
 

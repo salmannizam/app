@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image, FlatList } from 'react-native';
+import { View, StyleSheet, Text, Image, FlatList, ActivityIndicator } from 'react-native';
 import { Button, Card, TextInput, Snackbar } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker'; // For dropdown picker
 import * as ImagePicker from "expo-image-picker";
 
 const QuestionnaireScreen = () => {
+  const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<any[]>([]);
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageUris, setImageUris] = useState<{ [key: number]: string | null }>({}); // Track image per question
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [openDropdown, setOpenDropdown] = useState<{ [key: number]: boolean }>({}); // Manage dropdown open/close state
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null); // Track only the currently open dropdown ID
   const [openAccordion, setOpenAccordion] = useState<{ [key: number]: boolean }>({}); // Track accordion state for image upload
 
   useEffect(() => {
@@ -19,7 +20,6 @@ const QuestionnaireScreen = () => {
   }, []);
 
   const handleAnswerChange = (questionId: number, answer: any) => {
-    console.log(answer)
     setAnswers(prevAnswers => {
       const updatedAnswers = [...prevAnswers];
       const index = updatedAnswers.findIndex(a => a.QuestionID === questionId);
@@ -33,46 +33,48 @@ const QuestionnaireScreen = () => {
   };
 
   const handleSubmitSurvey = () => {
-    if (answers.length === 0 || answers.some(a => !a.answer && questions.find(q => q.QuestionID === a.QuestionID).Mandatory === "Yes")) {
+    setLoading(true);
+    const mandatoryQuestions = questions.filter(q => q.Mandatory === "Yes");
+
+    if (mandatoryQuestions.some(q => !answers.find(a => a.QuestionID === q.QuestionID)?.answer)) {
       setSnackbarMessage('Please answer all mandatory questions before submitting.');
       setOpenSnackbar(true);
+      setLoading(false);
       return;
     }
     console.log("Survey answers submitted:", answers);
     setSnackbarMessage('Your answers have been successfully submitted.');
     setOpenSnackbar(true);
+    setLoading(false);
   };
 
   const handleResetSurvey = () => {
     setAnswers([]);
-    setImageUri(null);
+    setImageUris({});
   };
 
-  const handleImageUpload = async () => {
+  const handleImageUpload = async (questionId: number) => {
     // Request media library permissions
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Permission to access media library is required.");
+    if (status !== 'granted') {
+      console.log('Permission to access media library is required.');
       return;
     }
 
-    // Open image library picker
+    // Open image picker
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"], // Provide media types as an array
+      mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri; // Access the image URI
-      setImageUri(uri);
+      const uri = result.assets[0].uri;
+      setImageUris(prev => ({ ...prev, [questionId]: uri }));
     } else {
-      console.log("Image picker canceled");
+      console.log('Image picker canceled');
     }
   };
-
-
-
 
   const renderQuestion = (question: any) => (
     <Card key={question.QuestionID} style={styles.card}>
@@ -92,7 +94,7 @@ const QuestionnaireScreen = () => {
         {question.Questiontype === 'Single Choice' && question.Choices && (
           <DropDownPicker
             multiple={false}
-            open={openDropdown[question.QuestionID] || false}
+            open={openDropdown === question.QuestionID}
             value={answers.find(a => a.QuestionID === question.QuestionID)?.answer || ''}
             items={question.Choices.map(choice => ({
               label: choice.ChoiceText,
@@ -103,12 +105,9 @@ const QuestionnaireScreen = () => {
               handleAnswerChange(question.QuestionID, newValue);
             }}
             containerStyle={styles.pickerContainer}
-            setOpen={(isOpen) =>
-              setOpenDropdown((prevState) => ({
-                ...prevState,
-                [question.QuestionID]: !!isOpen,
-              }))
-            }
+            setOpen={(isOpen) => {
+              setOpenDropdown(isOpen ? question.QuestionID : null);
+            }}
             style={styles.dropdownStyle} // Add this style for dropdown customizations
             dropDownContainerStyle={styles.dropdownContainerStyle} // Add this style for the dropdown container customization
           />
@@ -117,7 +116,7 @@ const QuestionnaireScreen = () => {
         {question.Questiontype === 'Matrix' && question.Matrixtype === 'Drop Down' && question.Choices && (
           <DropDownPicker
             multiple={false}
-            open={openDropdown[question.QuestionID] || false}
+            open={openDropdown === question.QuestionID}
             value={answers.find(a => a.QuestionID === question.QuestionID)?.answer || ''}
             items={question.Choices.map(choice => ({
               label: choice.ChoiceText,
@@ -128,17 +127,13 @@ const QuestionnaireScreen = () => {
               handleAnswerChange(question.QuestionID, newValue);
             }}
             containerStyle={styles.pickerContainer}
-            setOpen={(isOpen) =>
-              setOpenDropdown((prevState) => ({
-                ...prevState,
-                [question.QuestionID]: !!isOpen,
-              }))
-            }
+            setOpen={(isOpen) => {
+              setOpenDropdown(isOpen ? question.QuestionID : null);
+            }}
             style={styles.dropdownStyle} // Add this style for dropdown customizations
             dropDownContainerStyle={styles.dropdownContainerStyle} // Add this style for the dropdown container customization
           />
         )}
-
 
         {question.Questiontype === 'Image' && (
           <View style={styles.accordionContainer}>
@@ -153,18 +148,24 @@ const QuestionnaireScreen = () => {
             {openAccordion[question.QuestionID] && (
               <View style={styles.imageContainer}>
                 <Text style={styles.imageText}>Upload Image</Text>
-                {imageUri ? (
-                  <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+                {imageUris[question.QuestionID] ? (
+                  <Image source={{ uri: imageUris[question.QuestionID] }} style={styles.imagePreview} />
                 ) : (
                   <Text style={styles.imageText}>No image selected</Text>
                 )}
-                <Button icon="camera" mode="contained" onPress={handleImageUpload} style={styles.uploadButton}>
+                <Button
+                  icon="camera"
+                  mode="contained"
+                  onPress={() => handleImageUpload(question.QuestionID)}
+                  style={styles.uploadButton}
+                >
                   Select Image
                 </Button>
               </View>
             )}
           </View>
         )}
+
       </Card.Content>
     </Card>
   );
@@ -183,9 +184,14 @@ const QuestionnaireScreen = () => {
             <Button mode="outlined" onPress={handleResetSurvey} style={styles.resetButton} color="#5bc0de">
               Reset
             </Button>
-            <Button mode="contained" onPress={handleSubmitSurvey} style={styles.submitButton} color="#5bc0de">
-              Submit Survey
-            </Button>
+
+            {loading ? (
+              <ActivityIndicator animating={true} size="large" color="#5bc0de" />
+            ) : (
+              <Button mode="contained" onPress={handleSubmitSurvey} style={styles.submitButton} color="#5bc0de">
+                Submit Survey
+              </Button>
+            )}
           </View>
         }
       />
@@ -203,71 +209,70 @@ const styles = StyleSheet.create({
   },
   scrollViewContainer: {
     flexGrow: 1,
-    padding: 10,  // Reduced padding
-    paddingTop: 100,  // Reduced padding-top for more questions to fit
-    paddingBottom: 50, // Reduced padding-bottom for better space usage
+    padding: 10,  
+    paddingTop: 100,  
+    paddingBottom: 50, 
   },
   title: {
     textAlign: 'center',
-    marginBottom: 15,  // Reduced space for the title
-    fontSize: 18,  // Smaller font for the title
+    marginBottom: 15,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   card: {
-    marginBottom: 6,  // Reduced margin for compactness
+    marginBottom: 6,
     borderRadius: 8,
-    padding: 2,  // Smaller padding
-    elevation: 1,  // Reduced elevation for a flatter design
+    padding: 2,
+    elevation: 1,
   },
   question: {
-    fontSize: 11,  // Smaller text size for the question
-    marginBottom: 5,  // Reduced space between question and input
+    fontSize: 11,
+    marginBottom: 5,
   },
   input: {
-    marginBottom: 2,  // Reduced margin for compactness
-    fontSize: 10,      // Smaller font size
-    height: 30,        // Reduced height for the input field
-    paddingHorizontal: 8, // Reduced horizontal padding
-    paddingVertical: 4,   // Reduced vertical padding
+    marginBottom: 2,
+    fontSize: 10,
+    height: 30,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   pickerContainer: {
     marginBottom: 2,
   },
   dropdownStyle: {
-    zIndex: 9999, // Ensure the dropdown has a high stacking order
-    position: 'relative', // Positioning the dropdown properly
+    zIndex: 9999,
+    position: 'relative',
   },
-
   dropdownContainerStyle: {
-    zIndex: 9999, // Same for the dropdown container
-    position: 'absolute', // Ensure it appears above other components
+    zIndex: 9999,
+    position: 'absolute',
   },
   accordionContainer: {
-    marginBottom: 2,  // Reduced margin
+    marginBottom: 2,
   },
   accordionButton: {
-    paddingVertical: 4,  // Smaller button height
+    paddingVertical: 4,
   },
   accordionButtonLabel: {
-    fontSize: 11,  // Smaller label for accordion button
+    fontSize: 11,
   },
   imageContainer: {
     alignItems: 'center',
-    marginBottom: 2,  // Reduced margin
+    marginBottom: 2,
   },
   imageText: {
     textAlign: 'center',
-    marginBottom: 6,  // Reduced bottom margin
-    fontSize: 11,  // Smaller text size
+    marginBottom: 6,
+    fontSize: 11,
   },
   imagePreview: {
-    width: 80,  // Reduced image preview size
-    height: 80,  // Reduced image preview size
+    width: 80,
+    height: 80,
     borderRadius: 8,
-    marginBottom: 6,  // Reduced margin
+    marginBottom: 6,
   },
   uploadButton: {
-    marginTop: 4,  // Reduced top margin
+    marginTop: 4,
   },
   buttonContainer: {
     flexDirection: 'row',
