@@ -19,7 +19,10 @@
         "NSCameraUsageDescription": "We need your permission to use the camera.",
         "NSPhotoLibraryUsageDescription": "We need your permission to access your photo library.",
         "NSPhotoLibraryAddUsageDescription": "We need your permission to save photos to your library.",
-        "UIBackgroundModes": ["fetch", "remote-notification"]
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification"
+        ]
       }
     },
     "android": {
@@ -30,12 +33,21 @@
       "permissions": [
         "CAMERA",
         "WRITE_EXTERNAL_STORAGE",
-        "READ_EXTERNAL_STORAGE"
-      ]
+        "READ_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "package": "com.salman.surveyapp",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": []
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "5ee1d824-e2a5-4db3-9168-7598ddf820f9"
+      }
+    }
   }
 }
