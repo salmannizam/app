@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     position: 'absolute',
-    top: -25, // Position the icon slightly above the footer
+    top: -20, // Position the icon slightly above the footer
     alignSelf: 'center',
     zIndex: 2, // Ensure it is above the footer
   },

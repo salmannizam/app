@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image, FlatList, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, Image, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Button, Card, TextInput, Snackbar } from 'react-native-paper';
-import DropDownPicker from 'react-native-dropdown-picker'; // For dropdown picker
 import * as ImagePicker from "expo-image-picker";
+import Modal from 'react-native-modal'; // Import react-native-modal
 
 const QuestionnaireScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -13,6 +13,7 @@ const QuestionnaireScreen = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [openDropdown, setOpenDropdown] = useState<number | null>(null); // Track only the currently open dropdown ID
   const [openAccordion, setOpenAccordion] = useState<{ [key: number]: boolean }>({}); // Track accordion state for image upload
+  const [showImageUploads, setShowImageUploads] = useState(false); // Track whether to show image upload questions
 
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
@@ -30,6 +31,13 @@ const QuestionnaireScreen = () => {
       }
       return updatedAnswers;
     });
+
+    // Special case: If question ID is 10033172 and answer is "yes", show image upload questions
+    if (questionId === 10033172 && answer === 'yes') {
+      setShowImageUploads(true);
+    } else if (questionId === 10033172 && answer === 'no') {
+      setShowImageUploads(false);
+    }
   };
 
   const handleSubmitSurvey = () => {
@@ -76,109 +84,165 @@ const QuestionnaireScreen = () => {
     }
   };
 
-  const renderQuestion = (question: any) => (
-    <Card key={question.QuestionID} style={styles.card}>
-      <Card.Content>
-        <Text style={styles.question}>{question.Question}</Text>
+  const renderRegularQuestions = (question: any) => {
+    return (
+      <Card key={question.QuestionID} style={styles.card}>
+        <Card.Content>
+          <Text style={styles.question}>{question.Question}</Text>
 
-        {question.Questiontype === 'User Input' && (
-          <TextInput
-            style={styles.input}
-            mode="outlined"
-            keyboardType={question.Datatype === 'Number' ? 'numeric' : 'default'}
-            onChangeText={(text) => handleAnswerChange(question.QuestionID, text)}
-            value={answers.find(a => a.QuestionID === question.QuestionID)?.answer || ''}
-          />
-        )}
-
-        {question.Questiontype === 'Single Choice' && question.Choices && (
-          <DropDownPicker
-            multiple={false}
-            open={openDropdown === question.QuestionID}
-            value={answers.find(a => a.QuestionID === question.QuestionID)?.answer || ''}
-            items={question.Choices.map(choice => ({
-              label: choice.ChoiceText,
-              value: choice.ChoiceText,
-            }))}
-            setValue={(callback) => {
-              const newValue = callback(answers.find(a => a.QuestionID === question.QuestionID)?.answer || '');
-              handleAnswerChange(question.QuestionID, newValue);
-            }}
-            containerStyle={styles.pickerContainer}
-            setOpen={(isOpen) => {
-              setOpenDropdown(isOpen ? question.QuestionID : null);
-            }}
-            style={styles.dropdownStyle} // Add this style for dropdown customizations
-            dropDownContainerStyle={styles.dropdownContainerStyle} // Add this style for the dropdown container customization
-          />
-        )}
-
-        {question.Questiontype === 'Matrix' && question.Matrixtype === 'Drop Down' && question.Choices && (
-          <DropDownPicker
-            multiple={false}
-            open={openDropdown === question.QuestionID}
-            value={answers.find(a => a.QuestionID === question.QuestionID)?.answer || ''}
-            items={question.Choices.map(choice => ({
-              label: choice.ChoiceText,
-              value: choice.ChoiceText,
-            }))}
-            setValue={(callback) => {
-              const newValue = callback(answers.find(a => a.QuestionID === question.QuestionID)?.answer || '');
-              handleAnswerChange(question.QuestionID, newValue);
-            }}
-            containerStyle={styles.pickerContainer}
-            setOpen={(isOpen) => {
-              setOpenDropdown(isOpen ? question.QuestionID : null);
-            }}
-            style={styles.dropdownStyle} // Add this style for dropdown customizations
-            dropDownContainerStyle={styles.dropdownContainerStyle} // Add this style for the dropdown container customization
-          />
-        )}
-
-        {question.Questiontype === 'Image' && (
-          <View style={styles.accordionContainer}>
-            <Button
+          {question.Questiontype === 'User Input' && (
+            <TextInput
+              style={styles.input}
               mode="outlined"
-              onPress={() => setOpenAccordion(prev => ({ ...prev, [question.QuestionID]: !prev[question.QuestionID] }))}
-              style={styles.accordionButton}
-              labelStyle={styles.accordionButtonLabel}
-            >
-              {openAccordion[question.QuestionID] ? 'Hide' : 'Show'} Image Upload
-            </Button>
-            {openAccordion[question.QuestionID] && (
-              <View style={styles.imageContainer}>
-                <Text style={styles.imageText}>Upload Image</Text>
-                {imageUris[question.QuestionID] ? (
-                  <Image source={{ uri: imageUris[question.QuestionID] }} style={styles.imagePreview} />
-                ) : (
-                  <Text style={styles.imageText}>No image selected</Text>
-                )}
-                <Button
-                  icon="camera"
-                  mode="contained"
-                  onPress={() => handleImageUpload(question.QuestionID)}
-                  style={styles.uploadButton}
-                >
-                  Select Image
-                </Button>
-              </View>
-            )}
-          </View>
-        )}
+              keyboardType={question.Datatype === 'Number' ? 'numeric' : 'default'}
+              onChangeText={(text) => handleAnswerChange(question.QuestionID, text)}
+              value={answers.find(a => a.QuestionID === question.QuestionID)?.answer || ''}
+            />
+          )}
 
-      </Card.Content>
-    </Card>
-  );
+          {question.Questiontype === 'Single Choice' && question.Choices && (
+            <View>
+              <TouchableOpacity
+                 key={`dropdown-${question.QuestionID}`}  // Unique key here
+                onPress={() => setOpenDropdown(question.QuestionID)}
+                style={styles.dropdownButton}
+              >
+                <Text>{answers.find(a => a.QuestionID === question.QuestionID)?.answer || 'Select an option'}</Text>
+              </TouchableOpacity>
+
+              {/* Modal for Single Choice */}
+              <Modal
+                isVisible={openDropdown === question.QuestionID}
+                onBackdropPress={() => setOpenDropdown(null)}
+                onBackButtonPress={() => setOpenDropdown(null)} // Close on back button press
+                onSwipeComplete={() => setOpenDropdown(null)}
+                swipeDirection="down"
+                style={styles.modal}
+              >
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalHeader}>Select an Option</Text>
+                  {question.Choices.map((choice,index) => (
+                    <TouchableOpacity
+                    key={`choice-${choice.ChoiceID || index}`}   // Unique key for each choice
+                      style={styles.modalItem}
+                      onPress={() => {
+                        handleAnswerChange(question.QuestionID, choice.ChoiceText);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      <Text style={styles.modalItemText}>{choice.ChoiceText}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </Modal>
+            </View>
+          )}
+
+          {question.Questiontype === 'Matrix' && question.Matrixtype === 'Drop Down' && question.Choices && (
+            <View>
+              <TouchableOpacity
+                  key={`dropdown-${question.QuestionID}`}  // Unique key here
+                onPress={() => setOpenDropdown(question.QuestionID)}
+                style={styles.dropdownButton}
+              >
+                <Text>{answers.find(a => a.QuestionID === question.QuestionID)?.answer || 'Select an option'}</Text>
+              </TouchableOpacity>
+
+              {/* Modal for Matrix Drop Down */}
+              <Modal
+                isVisible={openDropdown === question.QuestionID}
+                onBackdropPress={() => setOpenDropdown(null)}
+                onBackButtonPress={() => setOpenDropdown(null)} // Close on back button press
+                onSwipeComplete={() => setOpenDropdown(null)}
+                swipeDirection="down"
+                style={styles.modal}
+              >
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalHeader}>Select an Option</Text>
+                  {question.Choices.map((choice,index) => (
+                    <TouchableOpacity
+                    key={`choice-${choice.ChoiceID || index}`} 
+                      style={styles.modalItem}
+                      onPress={() => {
+                        handleAnswerChange(question.QuestionID, choice.ChoiceText);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      <Text style={styles.modalItemText}>{choice.ChoiceText}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </Modal>
+            </View>
+          )}
+        </Card.Content>
+      </Card>
+    );
+  };
+
+  const renderImageUploadQuestions = (question: any) => {
+    return (
+      <Card key={question.QuestionID} style={styles.card}>
+        <Card.Content>
+          <Text style={styles.question}>{question.Question}</Text>
+
+          {question.Questiontype === 'Image' && (
+            <View style={styles.accordionContainer}>
+              <Button
+                mode="outlined"
+                onPress={() => setOpenAccordion(prev => ({ ...prev, [question.QuestionID]: !prev[question.QuestionID] }))}
+                style={styles.accordionButton}
+                labelStyle={styles.accordionButtonLabel}
+              >
+                {openAccordion[question.QuestionID] ? 'Hide' : 'Show'} Image Upload
+              </Button>
+              {openAccordion[question.QuestionID] && (
+                <View style={styles.imageContainer}>
+                  <Text style={styles.imageText}>Upload Image</Text>
+                  {imageUris[question.QuestionID] ? (
+                    <Image source={{ uri: imageUris[question.QuestionID] }} style={styles.imagePreview} />
+                  ) : (
+                    <Text style={styles.imageText}>No image selected</Text>
+                  )}
+                  <Button
+                     key={`upload-${question.QuestionID}`} // Unique key here
+                    icon="camera"
+                    mode="contained"
+                    onPress={() => handleImageUpload(question.QuestionID)}
+                    style={styles.uploadButton}
+                  >
+                    Select Image
+                  </Button>
+                </View>
+              )}
+            </View>
+          )}
+        </Card.Content>
+      </Card>
+    );
+  };
+
+  // Separate image-upload and regular questions
+  const regularQuestions = questions.filter(q => q.Questiontype !== 'Image');
+  const imageUploadQuestions = questions.filter(q => q.Questiontype === 'Image' && showImageUploads);
+
+  // Merge the regular questions first and then the image-upload questions
+  const filteredQuestions = [...regularQuestions, ...imageUploadQuestions];
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={questions}
-        renderItem={({ item }) => renderQuestion(item)}
+        data={filteredQuestions} // Combine regular and image-upload questions, with image uploads at the end
+        renderItem={({ item }) => {
+          if (item.Questiontype === 'Image') {
+            return renderImageUploadQuestions(item); // Render image-upload question
+          } else {
+            return renderRegularQuestions(item); // Render regular question
+          }
+        }}
         keyExtractor={(item) => item.QuestionID.toString()}
         contentContainerStyle={styles.scrollViewContainer}
         keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={<Text style={styles.title}>Survey Questions</Text>}
         ListFooterComponent={
           <View style={styles.buttonContainer}>
             <Button mode="outlined" onPress={handleResetSurvey} style={styles.resetButton} color="#5bc0de">
@@ -209,9 +273,9 @@ const styles = StyleSheet.create({
   },
   scrollViewContainer: {
     flexGrow: 1,
-    padding: 10,  
-    paddingTop: 100,  
-    paddingBottom: 50, 
+    padding: 10,
+    paddingTop: 100,
+    paddingBottom: 50,
   },
   title: {
     textAlign: 'center',
@@ -226,7 +290,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   question: {
-    fontSize: 11,
+    fontSize: 12,
     marginBottom: 5,
   },
   input: {
@@ -236,16 +300,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
-  pickerContainer: {
-    marginBottom: 2,
+  dropdownButton: {
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+    marginBottom: 10,
   },
-  dropdownStyle: {
-    zIndex: 9999,
-    position: 'relative',
+  modal: {
+    margin: 0,
+    justifyContent: 'flex-end',
   },
-  dropdownContainerStyle: {
-    zIndex: 9999,
-    position: 'absolute',
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 8,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  modalItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  modalItemText: {
+    fontSize: 14,
+    color: '#333',
   },
   accordionContainer: {
     marginBottom: 2,
@@ -290,5 +374,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
   },
 });
+
 
 export default QuestionnaireScreen;
