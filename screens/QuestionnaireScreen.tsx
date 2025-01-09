@@ -103,7 +103,7 @@ const QuestionnaireScreen = () => {
           {question.Questiontype === 'Single Choice' && question.Choices && (
             <View>
               <TouchableOpacity
-                 key={`dropdown-${question.QuestionID}`}  // Unique key here
+                key={`dropdown-${question.QuestionID}`}  // Unique key here
                 onPress={() => setOpenDropdown(question.QuestionID)}
                 style={styles.dropdownButton}
               >
@@ -121,9 +121,9 @@ const QuestionnaireScreen = () => {
               >
                 <View style={styles.modalContent}>
                   <Text style={styles.modalHeader}>Select an Option</Text>
-                  {question.Choices.map((choice,index) => (
+                  {question.Choices.map((choice, index) => (
                     <TouchableOpacity
-                    key={`choice-${choice.ChoiceID || index}`}   // Unique key for each choice
+                      key={`choice-${choice.ChoiceID || index}`}   // Unique key for each choice
                       style={styles.modalItem}
                       onPress={() => {
                         handleAnswerChange(question.QuestionID, choice.ChoiceText);
@@ -141,7 +141,7 @@ const QuestionnaireScreen = () => {
           {question.Questiontype === 'Matrix' && question.Matrixtype === 'Drop Down' && question.Choices && (
             <View>
               <TouchableOpacity
-                  key={`dropdown-${question.QuestionID}`}  // Unique key here
+                key={`dropdown-${question.QuestionID}`}  // Unique key here
                 onPress={() => setOpenDropdown(question.QuestionID)}
                 style={styles.dropdownButton}
               >
@@ -159,9 +159,9 @@ const QuestionnaireScreen = () => {
               >
                 <View style={styles.modalContent}>
                   <Text style={styles.modalHeader}>Select an Option</Text>
-                  {question.Choices.map((choice,index) => (
+                  {question.Choices.map((choice, index) => (
                     <TouchableOpacity
-                    key={`choice-${choice.ChoiceID || index}`} 
+                      key={`choice-${choice.ChoiceID || index}`}
                       style={styles.modalItem}
                       onPress={() => {
                         handleAnswerChange(question.QuestionID, choice.ChoiceText);
@@ -200,12 +200,16 @@ const QuestionnaireScreen = () => {
                 <View style={styles.imageContainer}>
                   <Text style={styles.imageText}>Upload Image</Text>
                   {imageUris[question.QuestionID] ? (
-                    <Image source={{ uri: imageUris[question.QuestionID] }} style={styles.imagePreview} />
+                    <Image
+                      source={{ uri: imageUris[question.QuestionID] || undefined }}
+                      style={styles.imagePreview}
+                    />
                   ) : (
                     <Text style={styles.imageText}>No image selected</Text>
                   )}
+
                   <Button
-                     key={`upload-${question.QuestionID}`} // Unique key here
+                    key={`upload-${question.QuestionID}`} // Unique key here
                     icon="camera"
                     mode="contained"
                     onPress={() => handleImageUpload(question.QuestionID)}
