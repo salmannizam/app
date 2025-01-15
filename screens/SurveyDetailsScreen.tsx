@@ -3,10 +3,10 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert, KeyboardAvo
 import Modal from 'react-native-modal';
 import SurveyDetailsStyles  from '../styles/SurveyDetailsStyle';
 import Toast from 'react-native-toast-message';
-import { submitPreSurveyDetails } from '../services/api'; // Import your validateProductId API
+import { submitPreSurveyDetails } from '../services/api'; // Import your validateProjectId API
 
 const SurveyDetailsScreen = ({ route, navigation }: any) => {
-  const { productId, surveyId } = route.params;
+  const { projectId, surveyId } = route.params;
 
   const [address, setAddress] = useState('');
   const [country, setCountry] = useState('');
@@ -23,17 +23,17 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
 
   // Handle submit logic
   const handleSubmit = async () => {
-    navigation.navigate('Questionnaire', { productId, surveyId });
+    navigation.navigate('Questionnaire', { projectId, surveyId });
     // Validate if required fields are filled
-    if (productId && surveyId && address && country && location && outletName && startZone) {
+    if (projectId && surveyId && address && country && location && outletName && startZone) {
       try {
         // Call the submitPreSurveyDetails API with the form data
-        const surveyData = { productId, surveyId, address, country, location, outletName, startZone };
+        const surveyData = { projectId, surveyId, address, country, location, outletName, startZone };
         const response = await submitPreSurveyDetails(surveyData);
 
         if (response.data.status == "success") {
           // Navigate to the 'Questionnaire' screen if submission is successful
-          navigation.navigate('Questionnaire', { productId, surveyId });
+          navigation.navigate('Questionnaire', { projectId, surveyId });
         } else {
           Toast.show({
             type: 'error',

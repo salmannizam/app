@@ -11,7 +11,7 @@ const api = axios.create({
 
 // Define the shape of the data sent in the request (SurveyDetails)
 interface PreSurveyDetails {
-  productId: string;
+  projectId: string;
   surveyId: string;
   address: string;
   country: string;
@@ -49,8 +49,8 @@ api.interceptors.response.use(
 );
 
 // API Call to submit survey details (POST request)
-export const validateProductId = (productId:string, surveyId:string ): Promise<AxiosResponse<ApiResponse>> => {
-    return api.post('/survey/validate-project', { productId, surveyId });
+export const validateProjectId = (projectId:string, surveyId:string ): Promise<AxiosResponse<ApiResponse>> => {
+    return api.post('/survey/validate-project', { projectId, surveyId });
   };
   
 
@@ -58,6 +58,6 @@ export const submitPreSurveyDetails = ( surveyData: PreSurveyDetails ): Promise<
     return api.post('/survey/pre-survey-details', surveyData);
   };
 
-  export const getSurveyQuestions = (productId:string, surveyId:string): Promise<AxiosResponse<ApiResponse>> => {
-    return api.post('/survey/get-questions', { productId, surveyId });
+  export const getSurveyQuestions = (projectId:string, surveyId:string): Promise<AxiosResponse<ApiResponse>> => {
+    return api.post('/survey/get-questions', { projectId, surveyId });
   };

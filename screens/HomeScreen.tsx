@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View, TouchableOpacity, ImageBackground, ActivityIndicator } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { validateProductId } from '../services/api'; // Import your validateProductId API
+import { validateProjectId } from '../services/api'; // Import your validateProjectId API
 import Toast from 'react-native-toast-message';
 
 // This type maps 'Home' and 'SurveyDetails' screens to their parameters
@@ -13,22 +13,22 @@ interface Props {
 }
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  const [productId, setProductId] = useState('');
+  const [projectId, setProjectId] = useState('');
   const [surveyId, setSurveyId] = useState('');
-  const [productIdValid, setProductIdValid] = useState(true);
+  const [projectIdValid, setProjectIdValid] = useState(true);
   const [surveyIdValid, setSurveyIdValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleNavigate = async () => {
-    navigation.navigate('SurveyDetails', { productId: '1', surveyId: '2' });
-    if (productId && surveyId) {
+    navigation.navigate('SurveyDetails', { projectId: '1', surveyId: '2' });
+    if (projectId && surveyId) {
       setIsLoading(true);
       try {
-        const response = await validateProductId(productId, surveyId);
+        const response = await validateProjectId(projectId, surveyId);
         if (response.data.status === "success") {
-          navigation.navigate('SurveyDetails', { productId, surveyId });
+          navigation.navigate('SurveyDetails', { projectId, surveyId });
         } else {
-          setProductIdValid(false);
+          setProjectIdValid(false);
           Toast.show({
             type: 'error',
             position: 'top',
@@ -66,13 +66,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Project ID</Text>
         <TextInput
-          style={[styles.input, !productIdValid && styles.inputError]}
+          style={[styles.input, !projectIdValid && styles.inputError]}
           placeholder="Enter Project ID"
           placeholderTextColor="#888"
-          value={productId}
+          value={projectId}
           onChangeText={text => {
-            setProductId(text);
-            setProductIdValid(true);
+            setProjectId(text);
+            setProjectIdValid(true);
           }}
         />
       </View>

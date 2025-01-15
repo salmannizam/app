@@ -17,7 +17,11 @@ const QuestionnaireScreen = () => {
 
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
-    setQuestions(questionsData);
+
+        // Sorting questions by QuestionID in ascending order
+        const sortedQuestions = questionsData.sort((a, b) => a.QuestionID - b.QuestionID);
+        // Setting the sorted questions to state
+        setQuestions(sortedQuestions);
   }, []);
 
   const handleAnswerChange = (questionId: number, answer: any) => {
@@ -56,7 +60,7 @@ const QuestionnaireScreen = () => {
     setLoading(false);
   };
 
-  const handleResetSurvey = () => {
+  const handleAddMoreSurvey = () => {
     setAnswers([]);
     setImageUris({});
   };
@@ -249,8 +253,8 @@ const QuestionnaireScreen = () => {
         keyboardShouldPersistTaps="handled"
         ListFooterComponent={
           <View style={styles.buttonContainer}>
-            <Button mode="outlined" onPress={handleResetSurvey} style={styles.resetButton} color="#5bc0de">
-              Reset
+            <Button mode="outlined" onPress={handleAddMoreSurvey} style={styles.addMoreButton} color="#5bc0de">
+              Add More
             </Button>
 
             {loading ? (
@@ -367,10 +371,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     marginTop: 15,
   },
-  resetButton: {
+  addMoreButton: {
     flex: 1,
     marginHorizontal: 5,
-    backgroundColor: '#FF6F61',
+    backgroundColor: 'blue',
   },
   submitButton: {
     flex: 1,
