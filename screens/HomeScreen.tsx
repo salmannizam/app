@@ -64,10 +64,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     <ImageBackground style={styles.container}>
       {/* Product ID Input */}
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Product ID</Text>
+        <Text style={styles.inputLabel}>Project ID</Text>
         <TextInput
           style={[styles.input, !productIdValid && styles.inputError]}
-          placeholder="Enter Product ID"
+          placeholder="Enter Project ID"
           placeholderTextColor="#888"
           value={productId}
           onChangeText={text => {
