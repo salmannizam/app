@@ -21,6 +21,21 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
     setIsModalVisible(false); // Close modal after selection
   };
 
+  const getCurrentTimeFormatted = () => {
+    const now = new Date();
+  
+    // Get the individual components of the date
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');  // Months are 0-indexed
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+  
+    // Format it into the desired string
+    return `${year}${month}${day}${hours}${minutes}${seconds}`;
+  };
+
   // Handle submit logic
   const handleSubmit = async () => {
     navigation.navigate('Questionnaire', { projectId, surveyId });
@@ -33,6 +48,10 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
 
         if (response.data.status == "success") {
           // Navigate to the 'Questionnaire' screen if submission is successful
+          const ResultID = getCurrentTimeFormatted();
+
+          const SurveyID = `S${ResultID}`
+
           navigation.navigate('Questionnaire', { projectId, surveyId });
         } else {
           Toast.show({

@@ -14,6 +14,7 @@ const QuestionnaireScreen = () => {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null); // Track only the currently open dropdown ID
   const [openAccordion, setOpenAccordion] = useState<{ [key: number]: boolean }>({}); // Track accordion state for image upload
   const [showImageUploads, setShowImageUploads] = useState(false); // Track whether to show image upload questions
+  const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
 
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
@@ -44,26 +45,40 @@ const QuestionnaireScreen = () => {
     }
   };
 
+  const handleAddMoreSurvey = () => {
+    // Store current answers in completed surveys
+    setCompletedSurveys(prevSurveys => [...prevSurveys, answers]);
+  
+    // Clear answers for the next survey
+    setAnswers([]);
+    setImageUris({});
+  };
+
+  
   const handleSubmitSurvey = () => {
     setLoading(true);
     const mandatoryQuestions = questions.filter(q => q.Mandatory === "Yes");
-
-    if (mandatoryQuestions.some(q => !answers.find(a => a.QuestionID === q.QuestionID)?.answer)) {
+  
+    // Check if all mandatory questions are answered
+    const missingAnswers = mandatoryQuestions.some(q => 
+      !answers.find(a => a.QuestionID === q.QuestionID)?.answer
+    );
+  
+    if (missingAnswers) {
       setSnackbarMessage('Please answer all mandatory questions before submitting.');
       setOpenSnackbar(true);
       setLoading(false);
       return;
     }
+  
+    // Assuming you want to call an API or save the data, use the answers here.
     console.log("Survey answers submitted:", answers);
+  
     setSnackbarMessage('Your answers have been successfully submitted.');
     setOpenSnackbar(true);
     setLoading(false);
   };
-
-  const handleAddMoreSurvey = () => {
-    setAnswers([]);
-    setImageUris({});
-  };
+  
 
   const handleImageUpload = async (questionId: number) => {
     // Request media library permissions
@@ -267,7 +282,25 @@ const QuestionnaireScreen = () => {
           </View>
         }
       />
-
+    {/* Completed Surveys Display */}
+    {completedSurveys.length > 0 && (
+      <View style={styles.completedSurveysContainer}>
+        <Text style={styles.completedSurveysTitle}>Completed Surveys</Text>
+        <FlatList
+          data={completedSurveys}
+          renderItem={({ item }) => (
+            <View style={styles.tableRow}>
+              {item.map((answer: any) => (
+                <View key={answer.QuestionID} style={styles.tableCell}>
+                  <Text>{answer.answer || 'N/A'}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </View>
+    )}
       <Snackbar visible={openSnackbar} onDismiss={() => setOpenSnackbar(false)} duration={Snackbar.DURATION_SHORT}>
         {snackbarMessage}
       </Snackbar>
@@ -381,6 +414,47 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     backgroundColor: '#4CAF50',
   },
+  completedSurveysContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  
+  completedSurveysTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+    textAlign: 'center',
+  },
+  
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    paddingVertical: 8,
+  },
+  
+  tableCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 4,
+    borderRightWidth: 1,
+    borderRightColor: '#ccc',
+    backgroundColor: '#fff',
+  },
+  
+  tableCellLast: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 4,
+    backgroundColor: '#fff',
+  },
+  
 });
 
 
