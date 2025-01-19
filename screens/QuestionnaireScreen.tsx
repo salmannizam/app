@@ -3,18 +3,30 @@ import { View, StyleSheet, Text, Image, FlatList, ActivityIndicator, TouchableOp
 import { Button, Card, TextInput, Snackbar } from 'react-native-paper';
 import * as ImagePicker from "expo-image-picker";
 import Modal from 'react-native-modal'; // Import react-native-modal
+import Toast from 'react-native-toast-message';
+import Collapsible from 'react-native-collapsible'; // Add this import for collapsible functionality
 
-const QuestionnaireScreen = () => {
+interface Answer {
+  QuestionID: number;
+  answer: string;
+}
+
+interface Survey {
+  answers: Answer[];
+}
+
+const QuestionnaireScreen = ({ projectId, surveyId,generatedSurveyID ,ResultID }: any) => {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<any[]>([]);
   const [imageUris, setImageUris] = useState<{ [key: number]: string | null }>({}); // Track image per question
-  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [openDropdown, setOpenDropdown] = useState<number | null>(null); // Track only the currently open dropdown ID
   const [openAccordion, setOpenAccordion] = useState<{ [key: number]: boolean }>({}); // Track accordion state for image upload
   const [showImageUploads, setShowImageUploads] = useState(false); // Track whether to show image upload questions
   const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
+
+  const [openAccordionSurveys, setOpenAccordionSurveys] = useState<number | null>(null);  // For Completed Surveys
 
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
@@ -45,39 +57,96 @@ const QuestionnaireScreen = () => {
     }
   };
 
-  const handleAddMoreSurvey = () => {
-    // Store current answers in completed surveys
-    setCompletedSurveys(prevSurveys => [...prevSurveys, answers]);
-  
-    // Clear answers for the next survey
-    setAnswers([]);
-    setImageUris({});
-  };
 
-  
-  const handleSubmitSurvey = () => {
-    setLoading(true);
+  const handleAddMoreSurvey = () => {
     const mandatoryQuestions = questions.filter(q => q.Mandatory === "Yes");
-  
-    // Check if all mandatory questions are answered
     const missingAnswers = mandatoryQuestions.some(q => 
       !answers.find(a => a.QuestionID === q.QuestionID)?.answer
     );
   
     if (missingAnswers) {
-      setSnackbarMessage('Please answer all mandatory questions before submitting.');
-      setOpenSnackbar(true);
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Validation Error',
+        text2: 'Please answer all mandatory questions before adding more.',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+  
+    const formattedSurvey = {
+      brand: "100202", // Replace with dynamic data if needed
+      answers: answers.map((answer) => ({
+        surveyid: generatedSurveyID, // Replace with dynamic data if needed
+        QuestionID: answer.QuestionID,
+        answerid: `${answer.QuestionID}-${answer.answer}`, // Unique answer ID
+        answertext: answer.answer,
+        Location: "(null)", // Replace with dynamic data if needed
+        remarks: "",
+        Deviceid: "CFCE89D1FC2F4F3A8432AC5B94668B71", // Replace with dynamic data if needed
+        projectid: projectId, // Replace with dynamic data if needed
+      })),
+    };
+  
+    // Ensure the survey is wrapped in an array
+    setCompletedSurveys((prevSurveys) => [...prevSurveys, [formattedSurvey]]);
+    // setAnswers([]);  // Reset answers for next survey
+    setImageUris({});  // Reset image URIs
+  };
+  
+  
+  
+  const handleSubmitSurvey = () => {
+    setLoading(true);
+    const mandatoryQuestions = questions.filter(q => q.Mandatory === "Yes");
+  
+    const missingAnswers = mandatoryQuestions.some(q => 
+      !answers.find(a => a.QuestionID === q.QuestionID)?.answer
+    );
+  
+    if (missingAnswers) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Validation Error',
+        text2: 'Please answer all mandatory questions before submitting.',
+        visibilityTime: 3000,
+      });
       setLoading(false);
       return;
     }
   
-    // Assuming you want to call an API or save the data, use the answers here.
-    console.log("Survey answers submitted:", answers);
+    // Format the answers into the desired JSON structure
+    const formattedSurvey = {
+      brand: "100202", // Replace with dynamic data if needed
+      answers: answers.map((answer) => ({
+        surveyid: generatedSurveyID, // Replace with dynamic data if needed
+        QuestionID: answer.QuestionID,
+        answerid: `${answer.QuestionID}-${answer.answer}`, // Unique answer ID
+        answertext: answer.answer,
+        Location: "(null)", // Replace with dynamic data if needed
+        remarks: "",
+        Deviceid: "CFCE89D1FC2F4F3A8432AC5B94668B71", // Replace with dynamic data if needed
+        projectid: projectId, // Replace with dynamic data if needed
+      })),
+    };
   
-    setSnackbarMessage('Your answers have been successfully submitted.');
-    setOpenSnackbar(true);
+    console.log("Formatted Survey JSON:", JSON.stringify([formattedSurvey]));
+  
+    // Here you can submit the JSON to a server or store it as required
+  
+    Toast.show({
+      type: 'success',
+      position: 'top',
+      text1: 'Survey Submitted',
+      text2: 'Your answers have been successfully submitted.',
+      visibilityTime: 3000,
+    });
+  
     setLoading(false);
   };
+  
   
 
   const handleImageUpload = async (questionId: number) => {
@@ -245,6 +314,44 @@ const QuestionnaireScreen = () => {
     );
   };
 
+  const toggleAccordion = (surveyIndex: number) => {
+    setOpenAccordionSurveys(prevState => prevState === surveyIndex ? null : surveyIndex);
+  };
+
+  const renderCompletedSurvey = (survey: Survey, surveyIndex: number) => {
+    console.log("survey",survey)
+    // Ensure survey is typed correctly
+    return (
+      <View style={styles.accordionContainer} key={surveyIndex}>
+        <TouchableOpacity onPress={() => toggleAccordion(surveyIndex)} style={styles.accordionButton}>
+          <Text style={styles.accordionButtonLabel}>Survey {surveyIndex + 1}</Text>
+        </TouchableOpacity>
+  
+        <Collapsible collapsed={openAccordionSurveys  !== surveyIndex}>
+          <View style={styles.tableContainer}>
+            {/* Table Header */}
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCell}>Question</Text>
+              <Text style={styles.tableCell}>Answer</Text>
+            </View>
+  
+            {/* Table Rows: Loop over answers */}
+            {survey.answers.map((answer: Answer) => {
+              const question = questions.find((q) => q.QuestionID === answer.QuestionID);
+              return (
+                <View key={answer.QuestionID} style={styles.tableRow}>
+                  <Text style={styles.tableCell}>{question?.Question || 'N/A'}</Text>
+                  <Text style={styles.tableCell}>{answer.answer || 'N/A'}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </Collapsible>
+      </View>
+    );
+  };
+  
+  
   // Separate image-upload and regular questions
   const regularQuestions = questions.filter(q => q.Questiontype !== 'Image');
   const imageUploadQuestions = questions.filter(q => q.Questiontype === 'Image' && showImageUploads);
@@ -282,28 +389,18 @@ const QuestionnaireScreen = () => {
           </View>
         }
       />
-    {/* Completed Surveys Display */}
-    {completedSurveys.length > 0 && (
-      <View style={styles.completedSurveysContainer}>
-        <Text style={styles.completedSurveysTitle}>Completed Surveys</Text>
-        <FlatList
-          data={completedSurveys}
-          renderItem={({ item }) => (
-            <View style={styles.tableRow}>
-              {item.map((answer: any) => (
-                <View key={answer.QuestionID} style={styles.tableCell}>
-                  <Text>{answer.answer || 'N/A'}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-          keyExtractor={(item, index) => index.toString()}
-        />
-      </View>
-    )}
-      <Snackbar visible={openSnackbar} onDismiss={() => setOpenSnackbar(false)} duration={Snackbar.DURATION_SHORT}>
-        {snackbarMessage}
-      </Snackbar>
+ 
+       {/* Completed Surveys Accordion */}
+       {completedSurveys.length > 0 && (
+  <View style={styles.completedSurveysContainer}>
+    <Text style={styles.completedSurveysTitle}>Added Surveys</Text>
+    {completedSurveys.map((survey, index) => renderCompletedSurvey(survey[0], index))}  {/* Accessing survey[0] */}
+  </View>
+)}
+
+
+      
+
     </View>
   );
 };
@@ -446,7 +543,11 @@ const styles = StyleSheet.create({
     borderRightColor: '#ccc',
     backgroundColor: '#fff',
   },
-  
+  tableContainer: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
+  },
   tableCellLast: {
     flex: 1,
     alignItems: 'center',

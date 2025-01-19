@@ -50,9 +50,9 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
           // Navigate to the 'Questionnaire' screen if submission is successful
           const ResultID = getCurrentTimeFormatted();
 
-          const SurveyID = `S${ResultID}`
+          const generatedSurveyID = `S${ResultID}`
 
-          navigation.navigate('Questionnaire', { projectId, surveyId });
+          navigation.navigate('Questionnaire', { projectId, surveyId,generatedSurveyID ,ResultID});
         } else {
           Toast.show({
             type: 'error',
