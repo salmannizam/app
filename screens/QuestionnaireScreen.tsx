@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import Modal from 'react-native-modal'; // Import react-native-modal
 import Toast from 'react-native-toast-message';
 import Collapsible from 'react-native-collapsible'; // Add this import for collapsible functionality
+import { getCurrentDateTime } from '../services/dateUtils';
 
 interface Answer {
   QuestionID: number;
@@ -15,7 +16,7 @@ interface Survey {
   answers: Answer[];
 }
 
-const QuestionnaireScreen = ({ projectId, surveyId,generatedSurveyID ,ResultID }: any) => {
+const QuestionnaireScreen = (surveyData: any) => {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<any[]>([]);
@@ -78,14 +79,14 @@ const QuestionnaireScreen = ({ projectId, surveyId,generatedSurveyID ,ResultID }
     const formattedSurvey = {
       brand: "100202", // Replace with dynamic data if needed
       answers: answers.map((answer) => ({
-        surveyid: generatedSurveyID, // Replace with dynamic data if needed
+        surveyid: surveyData.SurveyID, // Replace with dynamic data if needed
         QuestionID: answer.QuestionID,
         answerid: `${answer.QuestionID}-${answer.answer}`, // Unique answer ID
         answertext: answer.answer,
         Location: "(null)", // Replace with dynamic data if needed
         remarks: "",
         Deviceid: "CFCE89D1FC2F4F3A8432AC5B94668B71", // Replace with dynamic data if needed
-        projectid: projectId, // Replace with dynamic data if needed
+        ProjectId: surveyData.ProjectId, // Replace with dynamic data if needed
       })),
     };
   
@@ -116,19 +117,21 @@ const QuestionnaireScreen = ({ projectId, surveyId,generatedSurveyID ,ResultID }
       setLoading(false);
       return;
     }
+
+    const { date, time} = getCurrentDateTime();
   
     // Format the answers into the desired JSON structure
     const formattedSurvey = {
       brand: "100202", // Replace with dynamic data if needed
       answers: answers.map((answer) => ({
-        surveyid: generatedSurveyID, // Replace with dynamic data if needed
+        surveyid: surveyData.SurveyID, // Replace with dynamic data if needed
         QuestionID: answer.QuestionID,
         answerid: `${answer.QuestionID}-${answer.answer}`, // Unique answer ID
         answertext: answer.answer,
         Location: "(null)", // Replace with dynamic data if needed
         remarks: "",
         Deviceid: "CFCE89D1FC2F4F3A8432AC5B94668B71", // Replace with dynamic data if needed
-        projectid: projectId, // Replace with dynamic data if needed
+        ProjectId: surveyData.ProjectId, // Replace with dynamic data if needed
       })),
     };
   
