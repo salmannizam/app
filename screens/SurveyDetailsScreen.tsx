@@ -26,7 +26,7 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
 
   // Handle submit logic
   const handleSubmit = async () => {
-    navigation.navigate('Questionnaire', { projectId, surveyId });
+    // navigation.navigate('Questionnaire', { projectId, surveyId });
     // Validate if required fields are filled
     if (projectId && surveyId && address && country && location && outletName && startZone) {
       try {
