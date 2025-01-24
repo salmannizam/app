@@ -10,6 +10,7 @@ import * as Constants from 'expo-constants';
 import * as Application from 'expo-application';
 import * as SecureStore from 'expo-secure-store';
 import * as Device from 'expo-device';
+import * as FileSystem from 'expo-file-system';
 
 interface Answer {
   QuestionID: number;
@@ -45,18 +46,35 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     let deviceId = await SecureStore.getItemAsync('deviceId');
     if (!deviceId) {
       // Generate a device ID based on platform-specific properties
-      if (Device.osName === 'iOS' && Application.getIosIdForVendor) {
-        deviceId = Application.getIosIdForVendor();
+      if (Device.osName === 'iOS') {
+        const iosIdForVendor = await Application.getIosIdForVendorAsync();
+        deviceId = iosIdForVendor;
       } else if (Device.osName === 'Android') {
-        deviceId = Application.androidId;
+        deviceId = await Application.getAndroidId();
       } else {
         // Fallback for other platforms
         deviceId = `device-${Math.random().toString(36).substring(7)}`;
       }
-      // Persist the generated ID
-      await SecureStore.setItemAsync('deviceId', deviceId);
     }
-    return deviceId;
+    // Type assertion to tell TypeScript that deviceId will be a string here
+    await SecureStore.setItemAsync('deviceId', deviceId as string);
+    return deviceId || ''; // Ensure a fallback string if null
+  };
+
+  // Convert URI to Blob using fetch
+  const createBlobFromUri = async (uri: string, questionId: string) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      // Convert the blob into a File (you can assign the name dynamically)
+      const file = new File([blob], `image_${questionId}.jpg`, { type: 'image/jpeg' });
+
+      return file;
+    } catch (error) {
+      console.error("Error converting URI to Blob:", error);
+      return null;
+    }
   };
 
   const handleAnswerChange = (questionId: number, answer: any) => {
@@ -80,7 +98,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
   };
 
 
-  const handleSubmitSurvey = () => {
+  const handleSubmitSurvey = async () => {
     setLoading(true);
     const mandatoryQuestions = questions.filter(q => q.Mandatory === "Yes");
 
@@ -101,6 +119,8 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     }
 
     const { date, time } = getCurrentDateTime();
+    const deviceId = await getPersistentDeviceId();
+    console.log("Device ID:", deviceId);  // This will now correctly log the device ID
 
     // Format the answers into the desired JSON structure
     const formattedSurvey = answers.map((answer) => ({
@@ -110,12 +130,39 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       answertext: answer.answer || null,
       Location: "(null)", // Replace with dynamic data if needed
       remarks: "",
-      Deviceid: Constants.default.installationId || null,  // Replace with dynamic data if needed
+      Deviceid: deviceId || null,  // Replace with dynamic data if needed
       ProjectId: ProjectId || null,  // Replace with dynamic data if needed
     }));
 
 
-    console.log("Formatted Survey JSON:", JSON.stringify(formattedSurvey));
+    // Collect image files for upload
+    const formData = new FormData();
+
+    // Append the survey data to formData
+    formData.append('formattedSurvey', JSON.stringify(formattedSurvey));
+
+
+    // Check if imageUris exist before attempting to process images
+    const imageUrisExist = Object.keys(imageUris).length > 0;
+    const question10033172Answer = answers.find((a) => a.QuestionID === 10033172)?.answer;
+    if (imageUrisExist && question10033172Answer === 'yes') {
+      // Collect and convert image URIs to File objects
+      const imagePromises = Object.keys(imageUris).map(async (questionId) => {
+        const uri = imageUris[questionId];
+
+        // Convert the URI to a File/Blob object
+        const imageFile = await createBlobFromUri(uri, questionId);
+
+        if (imageFile) {
+          // Append each image to the FormData
+          formData.append('images', imageFile);
+        }
+      });
+
+      // Wait for all image files to be processed
+      await Promise.all(imagePromises);
+    }
+    console.log("Submitting survey with FormData:", formData);
 
     // Here you can submit the JSON to a server or store it as required
 
