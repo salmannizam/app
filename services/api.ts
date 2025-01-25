@@ -3,7 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 
 // Define your base URL for the API
 const api = axios.create({
-  baseURL: 'http://192.168.1.153:3000', // your base URL
+  baseURL: 'http://192.168.1.3:3000', // your base URL
   timeout: 5000, // set a timeout if necessary
 });
 
