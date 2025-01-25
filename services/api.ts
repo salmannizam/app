@@ -15,6 +15,7 @@ interface PreSurveyDetails {
   ResultID: string;
   OutletName: string;
   State: string;
+  country: string;
   Location: string;
   Address: string;
   Zone: string;
@@ -27,7 +28,7 @@ interface PreSurveyDetails {
 
 
 //survy questions
-interface SurveyQuestionsAnswer {
+interface answeredQuestions {
   SurveyID: string;
   QuestionID: number;
   answerid: string;
@@ -38,10 +39,10 @@ interface SurveyQuestionsAnswer {
   projectid: string;
 }
 
-//SUBMIT SURVEY
 interface SubmitSurvey {
   PreSurveyDetails: PreSurveyDetails;
-  SurveyQuestionsAnswer: SurveyQuestionsAnswer[];
+  answeredQuestions: answeredQuestions[];
+  images?: { [key: number]: File }; // This will be a map of question ID to file (image)
 }
 
 // Define the shape of the response data
@@ -82,7 +83,7 @@ export const getSurveyQuestions = (projectId: string, surveyId: string): Promise
   return api.post('/survey/get-questions', { projectId, surveyId });
 };
 
-export const submitPreSurveyDetails = (formData: FormData): Promise<AxiosResponse<ApiResponse>> => {
+export const submitPreSurveyDetails = (formData: SubmitSurvey): Promise<AxiosResponse<ApiResponse>> => {
   return api.post('/survey/submit-survey', formData, {
     headers: {
       'Content-Type': 'multipart/form-data', // Ensure the request is sent with the proper content type

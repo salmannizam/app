@@ -33,7 +33,8 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
   const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
 
   const [openAccordionSurveys, setOpenAccordionSurveys] = useState<number | null>(null);  // For Completed Surveys
-  const { ProjectId, SurveyID, ResultID, outletName, Location, Address, Zone, country } = route.params;
+
+  const { ProjectId, SurveyID, ResultID, outletName, Location, Address, Zone, country, state, StartDate, StartTime } = route.params;
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
 
@@ -77,6 +78,23 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       return null;
     }
   };
+
+
+  const createBase64FromUri = async (uri: string, questionId: string) => {
+    try {
+      // Use FileSystem to get the base64 encoded image from the URI
+      const base64String = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64
+      });
+
+      return base64String;
+    } catch (error) {
+      console.error("Error converting URI to Base64:", error);
+      return null;
+    }
+  };
+
+
 
   const handleAnswerChange = (questionId: number, answer: any) => {
     setAnswers(prevAnswers => {
@@ -125,23 +143,23 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 
     // Format the answers into the desired JSON structure
     const formattedSurvey = answers.map((answer) => ({
-      surveyid: SurveyID || null, // Replace with dynamic data if needed
+      surveyid: SurveyID || "", // Replace with dynamic data if needed
       QuestionID: answer.QuestionID,
       answerid: `${answer.QuestionID}-1`, // Unique answer ID
-      answertext: answer.answer || null,
+      answertext: answer.answer || "",
       Location: "(null)", // Replace with dynamic data if needed
       remarks: "",
-      Deviceid: deviceId || null,  // Replace with dynamic data if needed
-      ProjectId: ProjectId || null,  // Replace with dynamic data if needed
+      Deviceid: deviceId || "",  // Replace with dynamic data if needed
+      ProjectId: ProjectId || "",  // Replace with dynamic data if needed
     }));
 
 
-    const { ProjectId, SurveyID, ResultID, outletName, Location, Address, Zone, country, StartDate, StartTime } = route.params;
     const PreSurveyDetails = {
       SurveyID: SurveyID,
       ResultID: ResultID,
       OutletName: outletName,
-      State: country,
+      State: state,
+      country: country,
       Location: Location,
       Address: Address,
       Zone: Zone,
@@ -160,32 +178,30 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 
 
     if (imageUrisExist && question10033172Answer === 'yes') {
-      // Collect and convert image URIs to File objects
       const imagePromises = Object.keys(imageUris).map(async (questionId) => {
         const uri = imageUris[questionId];
+        const base64Image = await createBase64FromUri(uri, questionId);
 
-        const imageFile = await createBlobFromUri(uri, questionId);
-
-        if (imageFile) {
-          // Save image to the `allImages` object
-          allImages[questionId] = imageFile;
+        if (base64Image) {
+          allImages[questionId] = base64Image;
         }
       });
 
-      // Wait for all image files to be processed
       await Promise.all(imagePromises);
     }
 
-    // Prepare the form data
-    const formData = new FormData();
-    formData.append('PreSurveyDetails', JSON.stringify(PreSurveyDetails));
-    formData.append('projectId', ProjectId);  // Pass projectId
-    formData.append('answeredQuestions', JSON.stringify(formattedSurvey)); // Pass answered questions
-    formData.append('images', JSON.stringify(allImages)); // Pass images in JSON format
+
+    // Prepare the JSON data (including base64 images)
+    const surveyData: any = {
+      PreSurveyDetails,
+      answeredQuestions: formattedSurvey,
+      images: allImages,
+    };
+    console.log(surveyData)
 
     // Submit the survey data to the server using axios
     try {
-      const response = await submitPreSurveyDetails(formData);  // Pass FormData here
+      const response = await submitPreSurveyDetails(surveyData);  // Pass FormData here
 
       if (response.data.success) {
         console.log('Survey submitted successfully:', response.data);

@@ -12,6 +12,7 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
   const [address, setAddress] = useState('');
   const [country, setCountry] = useState('');
   const [location, setLocation] = useState('');
+  const [state, setState] = useState('');
   const [outletName, setOutletName] = useState('');
   const [startZone, setStartZone] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -35,7 +36,7 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
         // Navigate to the 'Questionnaire' screen if submission is successful
         const ResultID = FullDateTime;
         const generatedSurveyID = `S${ResultID}`
-        const surveyData = { ProjectId: projectId, SurveyID: generatedSurveyID, ResultID, outletName: outletName, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
+        const surveyData = { ProjectId: projectId, SurveyID: generatedSurveyID, ResultID, outletName: outletName, state, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
 
         navigation.navigate('Questionnaire', surveyData);
 
@@ -80,6 +81,18 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
             onChangeText={setAddress}
           />
         </View>
+
+        {/* Input Fields */}
+        <View style={SurveyDetailsStyles.inputContainer}>
+          <Text style={SurveyDetailsStyles.label}>State</Text>
+          <TextInput
+            style={SurveyDetailsStyles.input}
+            placeholder="Enter State"
+            value={state}
+            onChangeText={setState}
+          />
+        </View>
+
 
         <View style={SurveyDetailsStyles.inputContainer}>
           <Text style={SurveyDetailsStyles.label}>Country</Text>
