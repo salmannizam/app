@@ -11,6 +11,7 @@ import * as Application from 'expo-application';
 import * as SecureStore from 'expo-secure-store';
 import * as Device from 'expo-device';
 import * as FileSystem from 'expo-file-system';
+import { submitPreSurveyDetails } from '../services/api';
 
 interface Answer {
   QuestionID: number;
@@ -32,7 +33,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
   const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
 
   const [openAccordionSurveys, setOpenAccordionSurveys] = useState<number | null>(null);  // For Completed Surveys
-  const { ProjectId, SurveyID } = route.params;
+  const { ProjectId, SurveyID, ResultID, outletName, Location, Address, Zone, country } = route.params;
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
 
@@ -135,46 +136,90 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     }));
 
 
-    // Collect image files for upload
-    const formData = new FormData();
+    const { ProjectId, SurveyID, ResultID, outletName, Location, Address, Zone, country, StartDate, StartTime } = route.params;
+    const PreSurveyDetails = {
+      SurveyID: SurveyID,
+      ResultID: ResultID,
+      OutletName: outletName,
+      State: country,
+      Location: Location,
+      Address: Address,
+      Zone: Zone,
+      StartDate: StartDate,
+      StartTime: StartTime,
+      EndDate: date,
+      EndTime: time,
+      ProjectId: ProjectId,
+    };
 
-    // Append the survey data to formData
-    formData.append('formattedSurvey', JSON.stringify(formattedSurvey));
 
-
-    // Check if imageUris exist before attempting to process images
+    // Collect images
+    const allImages = {};
     const imageUrisExist = Object.keys(imageUris).length > 0;
     const question10033172Answer = answers.find((a) => a.QuestionID === 10033172)?.answer;
+
+
     if (imageUrisExist && question10033172Answer === 'yes') {
       // Collect and convert image URIs to File objects
       const imagePromises = Object.keys(imageUris).map(async (questionId) => {
         const uri = imageUris[questionId];
 
-        // Convert the URI to a File/Blob object
         const imageFile = await createBlobFromUri(uri, questionId);
 
         if (imageFile) {
-          // Append each image to the FormData
-          formData.append('images', imageFile);
+          // Save image to the `allImages` object
+          allImages[questionId] = imageFile;
         }
       });
 
       // Wait for all image files to be processed
       await Promise.all(imagePromises);
     }
-    console.log("Submitting survey with FormData:", formData);
 
-    // Here you can submit the JSON to a server or store it as required
+    // Prepare the form data
+    const formData = new FormData();
+    formData.append('PreSurveyDetails', JSON.stringify(PreSurveyDetails));
+    formData.append('projectId', ProjectId);  // Pass projectId
+    formData.append('answeredQuestions', JSON.stringify(formattedSurvey)); // Pass answered questions
+    formData.append('images', JSON.stringify(allImages)); // Pass images in JSON format
 
-    Toast.show({
-      type: 'success',
-      position: 'top',
-      text1: 'Survey Submitted',
-      text2: 'Your answers have been successfully submitted.',
-      visibilityTime: 3000,
-    });
+    // Submit the survey data to the server using axios
+    try {
+      const response = await submitPreSurveyDetails(formData);  // Pass FormData here
 
-    setLoading(false);
+      if (response.data.success) {
+        console.log('Survey submitted successfully:', response.data);
+        Toast.show({
+          type: 'success',
+          position: 'top',
+          text1: 'Survey Submitted',
+          text2: 'Your answers have been successfully submitted.',
+          visibilityTime: 3000,
+        });
+      } else {
+        console.error('Error submitting survey:', response.data.message);
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Error Submitting Survey',
+          text2: 'An error occurred while submitting your answers.',
+          visibilityTime: 3000,
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error Submitting Survey',
+        text2: 'An error occurred while submitting your answers.',
+        visibilityTime: 3000,
+      });
+    } finally {
+      setLoading(false);
+    }
+
+
   };
 
 

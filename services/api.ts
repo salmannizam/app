@@ -11,20 +11,44 @@ const api = axios.create({
 
 // Define the shape of the data sent in the request (SurveyDetails)
 interface PreSurveyDetails {
-  projectId: string;
-  surveyId: string;
-  address: string;
-  country: string;
-  location: string;
-  outletName: string;
-  startZone: string;
+  SurveyID: string;
+  ResultID: string;
+  OutletName: string;
+  State: string;
+  Location: string;
+  Address: string;
+  Zone: string;
+  StartDate: string;
+  StartTime: string;
+  EndDate: string;
+  EndTime: string;
+  ProjectId: string;
+}
+
+
+//survy questions
+interface SurveyQuestionsAnswer {
+  SurveyID: string;
+  QuestionID: number;
+  answerid: string;
+  answertext: string;
+  Location: string;
+  remarks: string;
+  Deviceid: string;
+  projectid: string;
+}
+
+//SUBMIT SURVEY
+interface SubmitSurvey {
+  PreSurveyDetails: PreSurveyDetails;
+  SurveyQuestionsAnswer: SurveyQuestionsAnswer[];
 }
 
 // Define the shape of the response data
 interface ApiResponse {
   success: boolean;
   message: string;
-  status: string; 
+  status: string;
 }
 
 // Add request interceptors to add headers (for example, Authorization)
@@ -49,15 +73,20 @@ api.interceptors.response.use(
 );
 
 // API Call to submit survey details (POST request)
-export const validateProjectId = (projectId:string, surveyId:string ): Promise<AxiosResponse<ApiResponse>> => {
-    return api.post('/survey/validate-project', { projectId, surveyId });
-  };
-  
+export const validateProjectId = (projectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
+  return api.post('/survey/validate-project', { projectId, surveyId });
+};
 
-export const submitPreSurveyDetails = ( surveyData: PreSurveyDetails ): Promise<AxiosResponse<ApiResponse>> => {
-    return api.post('/survey/pre-survey-details', surveyData);
-  };
 
-  export const getSurveyQuestions = (projectId:string, surveyId:string): Promise<AxiosResponse<ApiResponse>> => {
-    return api.post('/survey/get-questions', { projectId, surveyId });
-  };
+export const getSurveyQuestions = (projectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
+  return api.post('/survey/get-questions', { projectId, surveyId });
+};
+
+export const submitPreSurveyDetails = (formData: FormData): Promise<AxiosResponse<ApiResponse>> => {
+  return api.post('/survey/submit-survey', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data', // Ensure the request is sent with the proper content type
+    },
+  });
+};
+

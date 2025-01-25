@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import Modal from 'react-native-modal';
-import SurveyDetailsStyles  from '../styles/SurveyDetailsStyle';
+import SurveyDetailsStyles from '../styles/SurveyDetailsStyle';
 import Toast from 'react-native-toast-message';
 import { submitPreSurveyDetails } from '../services/api'; // Import your validateProjectId API
 import { getCurrentDateTime } from '../services/dateUtils';
@@ -31,15 +31,14 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
     if (projectId && surveyId && address && country && location && outletName && startZone) {
       try {
         // Call the submitPreSurveyDetails API with the form data
-        const { FullDateTime } = getCurrentDateTime();
-          // Navigate to the 'Questionnaire' screen if submission is successful
-          const ResultID = FullDateTime;
+        const { FullDateTime, time, date } = getCurrentDateTime();
+        // Navigate to the 'Questionnaire' screen if submission is successful
+        const ResultID = FullDateTime;
+        const generatedSurveyID = `S${ResultID}`
+        const surveyData = { ProjectId: projectId, SurveyID: generatedSurveyID, ResultID, outletName: outletName, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
 
-          const generatedSurveyID = `S${ResultID}`
-          const surveyData = { ProjectId:projectId, SurveyID:generatedSurveyID,ResultID,"Outlet Name":outletName,Location:location, Address:address,Zone:startZone, country };
-      
-          navigation.navigate('Questionnaire', surveyData);
-        
+        navigation.navigate('Questionnaire', surveyData);
+
       } catch (err) {
         console.error(err);
         // Show error toast if the API call fails
