@@ -83,11 +83,8 @@ export const getSurveyQuestions = (projectId: string, surveyId: string): Promise
   return api.post('/survey/get-questions', { projectId, surveyId });
 };
 
-export const submitPreSurveyDetails = (formData: SubmitSurvey): Promise<AxiosResponse<ApiResponse>> => {
-  return api.post('/survey/submit-survey', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data', // Ensure the request is sent with the proper content type
-    },
+export const submitPreSurveyDetails = (surveyData: SubmitSurvey): Promise<AxiosResponse<ApiResponse>> => {
+  return api.post('/survey/submit-survey', surveyData, {
   });
 };
 

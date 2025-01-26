@@ -147,7 +147,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       QuestionID: answer.QuestionID,
       answerid: `${answer.QuestionID}-1`, // Unique answer ID
       answertext: answer.answer || "",
-      Location: "(null)", // Replace with dynamic data if needed
+      Location: "", // Replace with dynamic data if needed
       remarks: "",
       Deviceid: deviceId || "",  // Replace with dynamic data if needed
       ProjectId: ProjectId || "",  // Replace with dynamic data if needed
@@ -170,6 +170,12 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       ProjectId: ProjectId,
     };
 
+    // Prepare the JSON data (including base64 images)
+    const surveyData: any = {
+      ProjectId: ProjectId,
+      PreSurveyDetails,
+      answeredQuestions: formattedSurvey,
+    };
 
     // Collect images
     const allImages = {};
@@ -181,29 +187,21 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       const imagePromises = Object.keys(imageUris).map(async (questionId) => {
         const uri = imageUris[questionId];
         const base64Image = await createBase64FromUri(uri, questionId);
-
         if (base64Image) {
           allImages[questionId] = base64Image;
         }
       });
 
       await Promise.all(imagePromises);
+      surveyData.images = allImages
     }
 
-
-    // Prepare the JSON data (including base64 images)
-    const surveyData: any = {
-      PreSurveyDetails,
-      answeredQuestions: formattedSurvey,
-      images: allImages,
-    };
     console.log(surveyData)
 
     // Submit the survey data to the server using axios
     try {
       const response = await submitPreSurveyDetails(surveyData);  // Pass FormData here
-
-      if (response.data.success) {
+      if (response.data.status === "success") {
         console.log('Survey submitted successfully:', response.data);
         Toast.show({
           type: 'success',
@@ -212,6 +210,12 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
           text2: 'Your answers have been successfully submitted.',
           visibilityTime: 3000,
         });
+
+        setAnswers([]);  // Clear the answers array
+        setImageUris({}); // Clear the image URIs
+        setShowImageUploads(false);  // Hide image upload questions
+        setOpenAccordion({});  // Reset accordion state
+  
       } else {
         console.error('Error submitting survey:', response.data.message);
         Toast.show({
