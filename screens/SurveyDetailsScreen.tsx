@@ -7,10 +7,10 @@ import { submitPreSurveyDetails } from '../services/api'; // Import your validat
 import { getCurrentDateTime } from '../services/dateUtils';
 
 const SurveyDetailsScreen = ({ route, navigation }: any) => {
-  const { projectId, surveyId } = route.params;
+  const { ProjectId, surveyId } = route.params;
 
   const [address, setAddress] = useState('');
-  const [country, setCountry] = useState('');
+  const [country, setCountry] = useState('IN');
   const [location, setLocation] = useState('');
   const [state, setState] = useState('');
   const [outletName, setOutletName] = useState('');
@@ -27,16 +27,16 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
 
   // Handle submit logic
   const handleSubmit = async () => {
-    // navigation.navigate('Questionnaire', { projectId, surveyId });
+    // navigation.navigate('Questionnaire', { ProjectId, surveyId });
     // Validate if required fields are filled
-    if (projectId && surveyId && address && country && location && outletName && startZone) {
+    if (ProjectId && surveyId && address && country && location && outletName && startZone) {
       try {
         // Call the submitPreSurveyDetails API with the form data
         const { FullDateTime, time, date } = getCurrentDateTime();
         // Navigate to the 'Questionnaire' screen if submission is successful
         const ResultID = FullDateTime;
         const generatedSurveyID = `S${ResultID}`
-        const surveyData = { ProjectId: projectId, SurveyID: generatedSurveyID, ResultID, outletName: outletName, state, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
+        const surveyData = { ProjectId: ProjectId, SurveyID: generatedSurveyID, ResultID, outletName: outletName, state, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
 
         navigation.navigate('Questionnaire', surveyData);
 
@@ -94,7 +94,7 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
         </View>
 
 
-        <View style={SurveyDetailsStyles.inputContainer}>
+        {/* <View style={SurveyDetailsStyles.inputContainer}>
           <Text style={SurveyDetailsStyles.label}>Country</Text>
           <TextInput
             style={SurveyDetailsStyles.input}
@@ -102,7 +102,7 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
             value={country}
             onChangeText={setCountry}
           />
-        </View>
+        </View> */}
 
         <View style={SurveyDetailsStyles.inputContainer}>
           <Text style={SurveyDetailsStyles.label}>Location</Text>

@@ -157,7 +157,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     const PreSurveyDetails = {
       SurveyID: SurveyID,
       ResultID: ResultID,
-      OutletName: outletName,
+      "Outlet Name": outletName,
       State: state,
       country: country,
       Location: Location,
@@ -211,10 +211,10 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
           visibilityTime: 3000,
         });
 
-        setAnswers([]);  // Clear the answers array
-        setImageUris({}); // Clear the image URIs
-        setShowImageUploads(false);  // Hide image upload questions
-        setOpenAccordion({});  // Reset accordion state
+        // setAnswers([]);  // Clear the answers array
+        // setImageUris({}); // Clear the image URIs
+        // setShowImageUploads(false);  // Hide image upload questions
+        // setOpenAccordion({});  // Reset accordion state
   
       } else {
         console.error('Error submitting survey:', response.data.message);

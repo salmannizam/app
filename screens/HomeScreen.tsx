@@ -13,20 +13,20 @@ interface Props {
 }
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  const [projectId, setProjectId] = useState('');
+  const [ProjectId, setProjectId] = useState('');
   const [surveyId, setSurveyId] = useState('');
   const [projectIdValid, setProjectIdValid] = useState(true);
   const [surveyIdValid, setSurveyIdValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleNavigate = async () => {
-    // navigation.navigate('SurveyDetails', { projectId: '1', surveyId: '2' });
-    if (projectId && surveyId) {
+    // navigation.navigate('SurveyDetails', { ProjectId: '1', surveyId: '2' });
+    if (ProjectId && surveyId) {
       setIsLoading(true);
       try {
-        const response = await validateProjectId(projectId, surveyId);
+        const response = await validateProjectId(ProjectId, surveyId);
         if (response.data.status === "success") {
-          navigation.navigate('SurveyDetails', { projectId, surveyId });
+          navigation.navigate('SurveyDetails', { ProjectId, surveyId });
         } else {
           setProjectIdValid(false);
           Toast.show({
@@ -69,7 +69,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           style={[styles.input, !projectIdValid && styles.inputError]}
           placeholder="Enter Project ID"
           placeholderTextColor="#888"
-          value={projectId}
+          value={ProjectId}
           onChangeText={text => {
             setProjectId(text);
             setProjectIdValid(true);

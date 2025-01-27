@@ -74,13 +74,13 @@ api.interceptors.response.use(
 );
 
 // API Call to submit survey details (POST request)
-export const validateProjectId = (projectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
-  return api.post('/survey/validate-project', { projectId, surveyId });
+export const validateProjectId = (ProjectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
+  return api.post('/survey/validate-project', { ProjectId, surveyId });
 };
 
 
-export const getSurveyQuestions = (projectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
-  return api.post('/survey/get-questions', { projectId, surveyId });
+export const getSurveyQuestions = (ProjectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
+  return api.post('/survey/get-questions', { ProjectId, surveyId });
 };
 
 export const submitPreSurveyDetails = (surveyData: SubmitSurvey): Promise<AxiosResponse<ApiResponse>> => {

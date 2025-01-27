@@ -1,6 +1,6 @@
 // types/navigation.ts
 export type RootStackParamList = {
     Home: undefined;
-    SurveyDetails: { projectId: string; surveyId: string };
+    SurveyDetails: { ProjectId: string; surveyId: string };
   };
   
