@@ -141,18 +141,28 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     const deviceId = await getPersistentDeviceId();
     console.log("Device ID:", deviceId);  // This will now correctly log the device ID
 
-    // Format the answers into the desired JSON structure
-    const formattedSurvey = answers.map((answer) => ({
-      SurveyID: SurveyID || "", // Replace with dynamic data if needed
-      ResultID: ResultID,
-      QuestionID: answer.QuestionID,
-      AnswerID: `${answer.QuestionID}-1`, // Unique answer ID
-      AnswerText: answer.answer || "",
-      Location: "", // Replace with dynamic data if needed
-      Remarks: "",
-      DeviceID: deviceId || "",  // Replace with dynamic data if needed
-      ProjectId: ProjectId || "",  // Replace with dynamic data if needed
-    }));
+
+    const formattedSurvey = answers.map((answer) => {
+      // Find the corresponding question by QuestionID
+      const question = questions.find((q) => q.QuestionID === answer.QuestionID);
+
+      return {
+        SurveyID: SurveyID || "",  // Replace with dynamic data if needed
+        ResultID: ResultID,
+        QuestionID: answer.QuestionID,
+        AnswerID: question?.Choices
+          ? (() => {
+            const choiceIndex = question.Choices.findIndex(choice => choice.ChoiceText === answer.answer);
+            return choiceIndex !== -1 ? `${answer.QuestionID}-${choiceIndex + 1}` : '0';
+          })()
+          : '0', // For questions without options (User Input)
+        AnswerText: answer.answer || "",
+        Location: "", // Replace with dynamic data if needed
+        Remarks: "",
+        DeviceID: deviceId || "",  // Replace with dynamic data if needed
+        ProjectId: ProjectId || "",  // Replace with dynamic data if needed
+      };
+    });
 
 
     const PreSurveyDetails = {
@@ -216,7 +226,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
         // setImageUris({}); // Clear the image URIs
         // setShowImageUploads(false);  // Hide image upload questions
         // setOpenAccordion({});  // Reset accordion state
-  
+
       } else {
         console.error('Error submitting survey:', response.data.message);
         Toast.show({
