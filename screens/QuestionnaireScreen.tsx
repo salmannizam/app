@@ -143,13 +143,14 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 
     // Format the answers into the desired JSON structure
     const formattedSurvey = answers.map((answer) => ({
-      surveyid: SurveyID || "", // Replace with dynamic data if needed
+      SurveyID: SurveyID || "", // Replace with dynamic data if needed
+      ResultID: ResultID,
       QuestionID: answer.QuestionID,
-      answerid: `${answer.QuestionID}-1`, // Unique answer ID
-      answertext: answer.answer || "",
+      AnswerID: `${answer.QuestionID}-1`, // Unique answer ID
+      AnswerText: answer.answer || "",
       Location: "", // Replace with dynamic data if needed
-      remarks: "",
-      Deviceid: deviceId || "",  // Replace with dynamic data if needed
+      Remarks: "",
+      DeviceID: deviceId || "",  // Replace with dynamic data if needed
       ProjectId: ProjectId || "",  // Replace with dynamic data if needed
     }));
 
@@ -159,7 +160,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       ResultID: ResultID,
       "Outlet Name": outletName,
       State: state,
-      country: country,
+      // country: country,
       Location: Location,
       Address: Address,
       Zone: Zone,

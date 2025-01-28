@@ -30,12 +30,13 @@ interface PreSurveyDetails {
 //survy questions
 interface answeredQuestions {
   SurveyID: string;
+  ResultID: string;
   QuestionID: number;
-  answerid: string;
-  answertext: string;
+  AnswerID: string;
+  AnswerText: string;
   Location: string;
-  remarks: string;
-  Deviceid: string;
+  Remarks: string;
+  DeviceID: string;
   projectid: string;
 }
 
