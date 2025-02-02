@@ -12,6 +12,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as Device from 'expo-device';
 import * as FileSystem from 'expo-file-system';
 import { submitPreSurveyDetails } from '../services/api';
+import RightSidebar from '../components/RightSidebar';
 
 interface Answer {
   QuestionID: number;
@@ -34,7 +35,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 
   const [openAccordionSurveys, setOpenAccordionSurveys] = useState<number | null>(null);  // For Completed Surveys
 
-  const { ProjectId, SurveyID, ResultID, outletName, Location, Address, Zone, country, state, StartDate, StartTime } = route.params;
+  const { ProjectId, outletName, Location, Address, Zone, country, state, StartDate, StartTime } = route.params;
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
 
@@ -137,17 +138,18 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       return;
     }
 
-    const { date, time } = getCurrentDateTime();
+    const { FullDateTime, date, time } = getCurrentDateTime();
     const deviceId = await getPersistentDeviceId();
     console.log("Device ID:", deviceId);  // This will now correctly log the device ID
-
+    const ResultID = FullDateTime;
+    const generatedSurveyID = `S${ResultID}`
 
     const formattedSurvey = answers.map((answer) => {
       // Find the corresponding question by QuestionID
       const question = questions.find((q) => q.QuestionID === answer.QuestionID);
 
       return {
-        SurveyID: SurveyID || "",  // Replace with dynamic data if needed
+        SurveyID: generatedSurveyID || "",  // Replace with dynamic data if needed
         ResultID: ResultID,
         QuestionID: answer.QuestionID,
         AnswerID: question?.Choices
@@ -166,7 +168,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 
 
     const PreSurveyDetails = {
-      SurveyID: SurveyID,
+      SurveyID: generatedSurveyID,
       ResultID: ResultID,
       "Outlet Name": outletName,
       State: state,
@@ -503,7 +505,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
           {completedSurveys.map((survey, index) => renderCompletedSurvey(survey[0], index))}  {/* Accessing survey[0] */}
         </View>
       )}
-
+      <RightSidebar surveys={completedSurveys} />
     </View>
   );
 };
@@ -511,6 +513,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    position: 'relative',
   },
   scrollViewContainer: {
     flexGrow: 1,

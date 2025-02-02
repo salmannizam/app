@@ -33,10 +33,8 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
       try {
         // Call the submitPreSurveyDetails API with the form data
         const { FullDateTime, time, date } = getCurrentDateTime();
-        // Navigate to the 'Questionnaire' screen if submission is successful
-        const ResultID = FullDateTime;
-        const generatedSurveyID = `S${ResultID}`
-        const surveyData = { ProjectId: ProjectId, SurveyID: generatedSurveyID, ResultID, outletName: outletName, state, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
+        
+        const surveyData = { ProjectId: ProjectId, outletName: outletName, state, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
 
         navigation.navigate('Questionnaire', surveyData);
 
