@@ -1,98 +1,48 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import Collapsible from 'react-native-collapsible';
+import React, { useState, useEffect } from "react";
+import { View, Animated, TouchableOpacity, StyleSheet } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons"; // Import close icon
 
-interface Survey {
-  answers: any[];
-}
+const RightSidebar = ({ isVisible, onClose }) => {
+  const [slideAnim] = useState(new Animated.Value(250)); // Sidebar starts off-screen
 
-interface RightSidebarProps {
-  surveys: Survey[];
-}
-
-const RightSidebar: React.FC<RightSidebarProps> = ({ surveys }) => {
-  const [isVisible, setIsVisible] = useState(false); // Track visibility of the sidebar
-  const [animation] = useState(new Animated.Value(-300)); // Start off-screen
-
-  const toggleSidebar = () => {
-    setIsVisible(!isVisible);
-    Animated.timing(animation, {
-      toValue: isVisible ? -300 : 0,
+  useEffect(() => {
+    Animated.timing(slideAnim, {
+      toValue: isVisible ? 0 : 250, // Slide in if visible, slide out otherwise
       duration: 300,
       useNativeDriver: true,
     }).start();
-  };
+  }, [isVisible]);
 
   return (
-    <View style={styles.container}>
-      {/* Floating Icon */}
-      <TouchableOpacity onPress={toggleSidebar} style={styles.floatingButton}>
-        <Text style={styles.buttonText}>+</Text>
+    <Animated.View
+      style={[
+        styles.sidebar,
+        { transform: [{ translateX: slideAnim }] }, // Apply animation
+      ]}
+    >
+      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+        <Ionicons name="close" size={24} color="white" />
       </TouchableOpacity>
-
-      {/* Sliding Sidebar */}
-      <Animated.View style={[styles.sidebar, { transform: [{ translateX: animation }] }]}>
-        <View style={styles.sidebarContent}>
-          <Text style={styles.title}>Completed Surveys</Text>
-          {surveys.length > 0 ? (
-            surveys.map((survey, index) => (
-              <Collapsible key={index} collapsed={false}>
-                <View style={styles.surveyItem}>
-                  <Text>Survey {index + 1}</Text>
-                  {/* Render survey data here */}
-                  <Text>Answers: {survey.answers.length}</Text>
-                </View>
-              </Collapsible>
-            ))
-          ) : (
-            <Text>No surveys available</Text>
-          )}
-        </View>
-      </Animated.View>
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    right: 20,
-    bottom: 100,
-  },
-  floatingButton: {
-    backgroundColor: '#5bc0de',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 10,
-  },
-  buttonText: {
-    fontSize: 30,
-    color: '#fff',
-  },
   sidebar: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0,
-    bottom: 0,
     width: 250,
-    backgroundColor: '#fff',
-    elevation: 5,
+    height: "100%",
+    backgroundColor: "white",
+    elevation: 10,
     padding: 20,
-    zIndex: 10,
   },
-  sidebarContent: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  surveyItem: {
-    marginBottom: 15,
+  closeButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 20,
+    alignSelf: "flex-end",
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, Image, FlatList, ActivityIndicator, PanResponder, TouchableOpacity } from 'react-native';
 import { Button, Card, TextInput, Snackbar } from 'react-native-paper';
 import * as ImagePicker from "expo-image-picker";
 import Modal from 'react-native-modal'; // Import react-native-modal
@@ -32,6 +32,8 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
   const [openAccordion, setOpenAccordion] = useState<{ [key: number]: boolean }>({}); // Track accordion state for image upload
   const [showImageUploads, setShowImageUploads] = useState(false); // Track whether to show image upload questions
   const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
+  const [isSubmittedModalVisible, setSubmittedModalVisible] = useState(false);
+  const [iconPosition, setIconPosition] = useState({ top: 200, left: 300 });
 
   const [openAccordionSurveys, setOpenAccordionSurveys] = useState<number | null>(null);  // For Completed Surveys
 
@@ -44,6 +46,25 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     // Setting the sorted questions to state
     setQuestions(sortedQuestions);
   }, []);
+
+  // Make icon draggable
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: (e, gestureState) => {
+      const { moveX, moveY } = gestureState;
+      setIconPosition({
+        top: moveY, // Use moveY for vertical drag
+        left: moveX, // Use moveX for horizontal drag
+      });
+    },
+    onPanResponderRelease: (e, gestureState) => {
+      const { moveX, moveY } = gestureState;
+      setIconPosition({
+        top: moveY, // Set final position on drag release
+        left: moveX, // Set final position on drag release
+      });
+    }
+  });
 
   const getPersistentDeviceId = async () => {
     let deviceId = await SecureStore.getItemAsync('deviceId');
@@ -170,7 +191,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     const PreSurveyDetails = {
       SurveyID: generatedSurveyID,
       ResultID: ResultID,
-      "Outlet Name": outletName,
+      Outlet_Name: outletName,
       State: state,
       // country: country,
       Location: Location,
@@ -505,7 +526,15 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
           {completedSurveys.map((survey, index) => renderCompletedSurvey(survey[0], index))}  {/* Accessing survey[0] */}
         </View>
       )}
-      <RightSidebar surveys={completedSurveys} />
+
+      {/* <TouchableOpacity
+        {...panResponder.panHandlers} // Attach panResponder
+        style={[styles.iconButton, { top: iconPosition.top, left: iconPosition.left }]} // Dynamically update position
+        onPress={() => setSubmittedModalVisible((prev) => !prev)}
+      >
+        <Text style={styles.iconText}>☰</Text>
+      </TouchableOpacity> */}
+
     </View>
   );
 };
@@ -660,6 +689,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 4,
     backgroundColor: '#fff',
+  },
+
+  iconButton: {
+    position: 'absolute', // Make sure the icon is absolutely positioned
+    padding: 15,
+    borderRadius: 30,
+    backgroundColor: 'blue',
+  },
+  iconText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 
 });
