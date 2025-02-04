@@ -37,7 +37,8 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 
   const [openAccordionSurveys, setOpenAccordionSurveys] = useState<number | null>(null);  // For Completed Surveys
 
-  const { ProjectId, outletName, Location, Address, Zone, country, state, StartDate, StartTime } = route.params;
+  console.log(route.params)
+  const { ProjectId, outletName,SurveyID, ResultID, Location, Address, Zone, country, state, StartDate, StartTime } = route.params;
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
 
@@ -83,22 +84,6 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     // Type assertion to tell TypeScript that deviceId will be a string here
     await SecureStore.setItemAsync('deviceId', deviceId as string);
     return deviceId || ''; // Ensure a fallback string if null
-  };
-
-  // Convert URI to Blob using fetch
-  const createBlobFromUri = async (uri: string, questionId: string) => {
-    try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-
-      // Convert the blob into a File (you can assign the name dynamically)
-      const file = new File([blob], `image_${questionId}.jpg`, { type: 'image/jpeg' });
-
-      return file;
-    } catch (error) {
-      console.error("Error converting URI to Blob:", error);
-      return null;
-    }
   };
 
 
@@ -162,15 +147,13 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     const { FullDateTime, date, time } = getCurrentDateTime();
     const deviceId = await getPersistentDeviceId();
     console.log("Device ID:", deviceId);  // This will now correctly log the device ID
-    const ResultID = FullDateTime;
-    const generatedSurveyID = `S${ResultID}`
 
     const formattedSurvey = answers.map((answer) => {
       // Find the corresponding question by QuestionID
       const question = questions.find((q) => q.QuestionID === answer.QuestionID);
 
       return {
-        SurveyID: generatedSurveyID || "",  // Replace with dynamic data if needed
+        SurveyID: SurveyID || "",  // Replace with dynamic data if needed
         ResultID: ResultID,
         QuestionID: answer.QuestionID,
         AnswerID: question?.Choices
@@ -189,7 +172,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 
 
     const PreSurveyDetails = {
-      SurveyID: generatedSurveyID,
+      SurveyID: SurveyID,
       ResultID: ResultID,
       Outlet_Name: outletName,
       State: state,
@@ -230,7 +213,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       surveyData.images = allImages
     }
 
-    console.log(surveyData)
+    // console.log(surveyData)
 
     // Submit the survey data to the server using axios
     try {
@@ -448,7 +431,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
   };
 
   const renderCompletedSurvey = (survey: Survey, surveyIndex: number) => {
-    console.log("survey", survey)
+    // console.log("survey", survey)
     // Ensure survey is typed correctly
     return (
       <View style={styles.accordionContainer} key={surveyIndex}>

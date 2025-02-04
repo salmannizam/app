@@ -3,7 +3,7 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert, KeyboardAvo
 import Modal from 'react-native-modal';
 import SurveyDetailsStyles from '../styles/SurveyDetailsStyle';
 import Toast from 'react-native-toast-message';
-import { submitPreSurveyDetails } from '../services/api'; // Import your validateProjectId API
+import { getResultId, submitPreSurveyDetails } from '../services/api'; // Import your validateProjectId API
 import { getCurrentDateTime } from '../services/dateUtils';
 
 const SurveyDetailsScreen = ({ route, navigation }: any) => {
@@ -31,12 +31,24 @@ const SurveyDetailsScreen = ({ route, navigation }: any) => {
     // Validate if required fields are filled
     if (ProjectId && surveyId && address && country && location && outletName && startZone) {
       try {
-        // Call the submitPreSurveyDetails API with the form data
-        const { FullDateTime, time, date } = getCurrentDateTime();
-        
-        const surveyData = { ProjectId: ProjectId, outletName: outletName, state, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
 
-        navigation.navigate('Questionnaire', surveyData);
+        const response = await getResultId(ProjectId, surveyId, outletName);
+        if (response.data.status === "success") {
+          // console.log(response.data.data)
+          // Call the submitPreSurveyDetails API with the form data
+          const { FullDateTime, time, date } = getCurrentDateTime();
+          const ResultID = (response.data.data.resultId) ? response.data.data.resultId : FullDateTime
+          const surveyData = { ProjectId: ProjectId, SurveyID:surveyId, ResultID, outletName: outletName, state, Location: location, Address: address, Zone: startZone, country, StartDate: date, StartTime: time };
+          navigation.navigate('Questionnaire', surveyData);
+
+        } else {
+          Toast.show({
+            type: 'error',
+            position: 'top',
+            text1: 'Something went wrong',
+            visibilityTime: 3000,
+          });
+        }
 
       } catch (err) {
         console.error(err);

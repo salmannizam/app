@@ -51,6 +51,7 @@ interface ApiResponse {
   success: boolean;
   message: string;
   status: string;
+  data: any;
 }
 
 // Add request interceptors to add headers (for example, Authorization)
@@ -77,6 +78,11 @@ api.interceptors.response.use(
 // API Call to submit survey details (POST request)
 export const validateProjectId = (ProjectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
   return api.post('/survey/validate-project', { ProjectId, surveyId });
+};
+
+
+export const getResultId = (ProjectId: string, surveyId: string, outletName: string): Promise<AxiosResponse<ApiResponse>> => {
+  return api.post('/survey/get-resultid', { ProjectId, surveyId, OutletName: outletName });
 };
 
 

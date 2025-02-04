@@ -26,7 +26,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       try {
         const response = await validateProjectId(ProjectId, surveyId);
         if (response.data.status === "success") {
-          navigation.navigate('SurveyDetails', { ProjectId, surveyId });
+          navigation.navigate('SurveyDetails', { ProjectId, surveyId: response.data.data.surveyId });
         } else {
           setProjectIdValid(false);
           Toast.show({
@@ -93,9 +93,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       {/* Proceed Button */}
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleNavigate} 
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleNavigate}
         disabled={isLoading}>
         {isLoading ? (
           <ActivityIndicator size="small" color="#fff" />
