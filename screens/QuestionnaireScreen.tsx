@@ -38,7 +38,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
   const [openAccordionSurveys, setOpenAccordionSurveys] = useState<number | null>(null);  // For Completed Surveys
 
   console.log(route.params)
-  const { ProjectId, outletName,SurveyID, ResultID, Location, Address, Zone, country, state, StartDate, StartTime } = route.params;
+  const { ProjectId, outletName, SurveyID, ResultID, Location, Address, Zone, country, state, StartDate, StartTime } = route.params;
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
 
@@ -144,24 +144,24 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       return;
     }
 
-      // Validate specific QuestionIDs for YYYYMMDD format
-  const dateQuestionIDs = [10033170, 10033171];
+    // Validate specific QuestionIDs for YYYYMMDD format
+    const dateQuestionIDs = [10033170, 10033171];
 
-  const invalidDateAnswer = answers.some((a) => 
-    dateQuestionIDs.includes(a.QuestionID) && a.answer && !/^\d{8}$/.test(a.answer)
-  );
-  
-  if (invalidDateAnswer) {
-    Toast.show({
-      type: 'error',
-      position: 'top',
-      text1: 'Invalid Date Format',
-      text2: 'Please enter a valid date in YYYYMMDD format.',
-      visibilityTime: 3000,
-    });
-    setLoading(false);
-    return;
-  }
+    const invalidDateAnswer = answers.some((a) =>
+      dateQuestionIDs.includes(a.QuestionID) && a.answer && !/^\d{8}$/.test(a.answer)
+    );
+
+    if (invalidDateAnswer) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Invalid Date Format',
+        text2: 'Please enter a valid date in YYYYMMDD format.',
+        visibilityTime: 3000,
+      });
+      setLoading(false);
+      return;
+    }
 
 
     const { FullDateTime, date, time } = getCurrentDateTime();
@@ -238,6 +238,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     // Submit the survey data to the server using axios
     try {
       const response = await submitPreSurveyDetails(surveyData);  // Pass FormData here
+      // console.log(response)
       if (response.data.status === "success") {
         console.log('Survey submitted successfully:', response.data);
         Toast.show({
@@ -254,24 +255,37 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
         setOpenAccordion({});  // Reset accordion state
 
       } else {
+
         console.error('Error submitting survey:', response.data.message);
         Toast.show({
           type: 'error',
           position: 'top',
           text1: 'Error Submitting Survey',
-          text2: 'An error occurred while submitting your answers.',
+          text2: response.data.message || 'An error occurred while submitting your answers.',
           visibilityTime: 3000,
         });
       }
     } catch (error) {
       console.error('Error submitting survey:', error);
+
+      // Extract error message
+      let errorMessage = "An error occurred while submitting your answers.";
+      if (error.response) {
+        errorMessage = error.response.data?.message || "Server error occurred.";
+      } else if (error.request) {
+        errorMessage = "No response from server. Please check your internet connection.";
+      } else {
+        errorMessage = error.message;
+      }
+    
       Toast.show({
         type: 'error',
         position: 'top',
         text1: 'Error Submitting Survey',
-        text2: 'An error occurred while submitting your answers.',
+        text2: errorMessage,
         visibilityTime: 3000,
       });
+      
     } finally {
       setLoading(false);
     }

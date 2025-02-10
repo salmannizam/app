@@ -66,14 +66,36 @@ api.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+
 // Add response interceptors (for error handling, etc.)
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     // Handle errors globally (you can show a Toast or handle error responses)
+//     return Promise.reject(error);
+//   }
+// );
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle errors globally (you can show a Toast or handle error responses)
-    return Promise.reject(error);
+    let errorMessage = "Something went wrong. Please try again.";
+
+    if (error.response) {
+      // The request was made and the server responded with a status code outside 2xx
+      errorMessage = error.response.data?.message || errorMessage;
+    } else if (error.request) {
+      // The request was made but no response was received
+      errorMessage = "No response from server. Check your internet connection.";
+    } else {
+      // Something happened in setting up the request
+      errorMessage = error.message;
+    }
+
+    return Promise.reject(new Error(errorMessage));
   }
 );
+
 
 // API Call to submit survey details (POST request)
 export const validateProjectId = (ProjectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {

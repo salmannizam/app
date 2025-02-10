@@ -84,18 +84,18 @@ const App = () => {
                           outputRange: [0, 1], // Fade in as it moves
                         }),
                         transform: [
-                          {
-                            translateX: current.progress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [200, 0], // Slide from right to left
-                            }),
-                          },
-                          {
-                            scale: current.progress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0.5, 1], // Slight scaling effect
-                            }),
-                          },
+                          // {
+                          //   translateX: current.progress.interpolate({
+                          //     inputRange: [0, 1],
+                          //     outputRange: [200, 0], // Slide from right to left
+                          //   }),
+                          // },
+                          // {
+                          //   scale: current.progress.interpolate({
+                          //     inputRange: [0, 1],
+                          //     outputRange: [0.5, 1], // Slight scaling effect
+                          //   }),
+                          // },
                         ],
                       },
                     };
@@ -109,18 +109,18 @@ const App = () => {
                         outputRange: [1, 0], // Fade out as it moves backward
                       }),
                       transform: [
-                        {
-                          translateX: current.progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, -600], // Slide from left to right (negative for back)
-                          }),
-                        },
-                        {
-                          scale: current.progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [1, 0.9], // Slight scaling effect when going back
-                          }),
-                        },
+                        // {
+                        //   translateX: current.progress.interpolate({
+                        //     inputRange: [0, 1],
+                        //     outputRange: [0, -600], // Slide from left to right (negative for back)
+                        //   }),
+                        // },
+                        // {
+                        //   scale: current.progress.interpolate({
+                        //     inputRange: [0, 1],
+                        //     outputRange: [1, 0.9], // Slight scaling effect when going back
+                        //   }),
+                        // },
                       ],
                     },
                   };
@@ -147,18 +147,18 @@ const App = () => {
                           outputRange: [0, 1], // Fade in as it moves
                         }),
                         transform: [
-                          {
-                            translateX: current.progress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [200, 0], // Slide from right to left
-                            }),
-                          },
-                          {
-                            scale: current.progress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0.5, 1], // Slight scaling effect
-                            }),
-                          },
+                          // {
+                          //   translateX: current.progress.interpolate({
+                          //     inputRange: [0, 1],
+                          //     outputRange: [200, 0], // Slide from right to left
+                          //   }),
+                          // },
+                          // {
+                          //   scale: current.progress.interpolate({
+                          //     inputRange: [0, 1],
+                          //     outputRange: [0.5, 1], // Slight scaling effect
+                          //   }),
+                          // },
                         ],
                       },
                     };
@@ -172,18 +172,18 @@ const App = () => {
                         outputRange: [1, 0], // Fade out as it moves backward
                       }),
                       transform: [
-                        {
-                          translateX: current.progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, -600], // Slide from left to right (negative for back)
-                          }),
-                        },
-                        {
-                          scale: current.progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [1, 0.9], // Slight scaling effect when going back
-                          }),
-                        },
+                        // {
+                        //   translateX: current.progress.interpolate({
+                        //     inputRange: [0, 1],
+                        //     outputRange: [0, -600], // Slide from left to right (negative for back)
+                        //   }),
+                        // },
+                        // {
+                        //   scale: current.progress.interpolate({
+                        //     inputRange: [0, 1],
+                        //     outputRange: [1, 0.9], // Slight scaling effect when going back
+                        //   }),
+                        // },
                       ],
                     },
                   };
