@@ -146,10 +146,11 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
 
       // Validate specific QuestionIDs for YYYYMMDD format
   const dateQuestionIDs = [10033170, 10033171];
-  const invalidDateAnswer = answers.some((a) => 
-    dateQuestionIDs.includes(a.QuestionID) && !/^\d{8}$/.test(a.answer)
-  );
 
+  const invalidDateAnswer = answers.some((a) => 
+    dateQuestionIDs.includes(a.QuestionID) && a.answer && !/^\d{8}$/.test(a.answer)
+  );
+  
   if (invalidDateAnswer) {
     Toast.show({
       type: 'error',
