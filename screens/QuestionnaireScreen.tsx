@@ -144,6 +144,25 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       return;
     }
 
+      // Validate specific QuestionIDs for YYYYMMDD format
+  const dateQuestionIDs = [10033170, 10033171];
+  const invalidDateAnswer = answers.some((a) => 
+    dateQuestionIDs.includes(a.QuestionID) && !/^\d{8}$/.test(a.answer)
+  );
+
+  if (invalidDateAnswer) {
+    Toast.show({
+      type: 'error',
+      position: 'top',
+      text1: 'Invalid Date Format',
+      text2: 'Please enter a valid date in YYYYMMDD format.',
+      visibilityTime: 3000,
+    });
+    setLoading(false);
+    return;
+  }
+
+
     const { FullDateTime, date, time } = getCurrentDateTime();
     const deviceId = await getPersistentDeviceId();
     console.log("Device ID:", deviceId);  // This will now correctly log the device ID
