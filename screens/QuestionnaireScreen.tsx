@@ -11,7 +11,7 @@ import * as Application from 'expo-application';
 import * as SecureStore from 'expo-secure-store';
 import * as Device from 'expo-device';
 import * as FileSystem from 'expo-file-system';
-import { submitPreSurveyDetails } from '../services/api';
+import { getSurveyQuestions, submitPreSurveyDetails } from '../services/api';
 import RightSidebar from '../components/RightSidebar';
 
 interface Answer {
@@ -32,8 +32,6 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
   const [openAccordion, setOpenAccordion] = useState<{ [key: number]: boolean }>({}); // Track accordion state for image upload
   const [showImageUploads, setShowImageUploads] = useState(false); // Track whether to show image upload questions
   const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
-  const [isSubmittedModalVisible, setSubmittedModalVisible] = useState(false);
-  const [iconPosition, setIconPosition] = useState({ top: 200, left: 300 });
 
   const [openAccordionSurveys, setOpenAccordionSurveys] = useState<number | null>(null);  // For Completed Surveys
 
@@ -42,30 +40,27 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
   useEffect(() => {
     const questionsData = require('../assets/questions.json');
 
+    async function getQuesion() {
+
+      const response = await getSurveyQuestions(SurveyID);
+      if (response.data.status === "success") {
+        // console.log(response.data.data)
+
+      } else {
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Unable to get survey questions',
+          visibilityTime: 3000,
+        });
+      }
+    }
+
     // Sorting questions by QuestionID in ascending order
     const sortedQuestions = questionsData.sort((a, b) => a.QuestionID - b.QuestionID);
     // Setting the sorted questions to state
     setQuestions(sortedQuestions);
   }, []);
-
-  // Make icon draggable
-  const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderMove: (e, gestureState) => {
-      const { moveX, moveY } = gestureState;
-      setIconPosition({
-        top: moveY, // Use moveY for vertical drag
-        left: moveX, // Use moveX for horizontal drag
-      });
-    },
-    onPanResponderRelease: (e, gestureState) => {
-      const { moveX, moveY } = gestureState;
-      setIconPosition({
-        top: moveY, // Set final position on drag release
-        left: moveX, // Set final position on drag release
-      });
-    }
-  });
 
   const getPersistentDeviceId = async () => {
     let deviceId = await SecureStore.getItemAsync('deviceId');
@@ -86,7 +81,6 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
     return deviceId || ''; // Ensure a fallback string if null
   };
 
-
   const createBase64FromUri = async (uri: string, questionId: string) => {
     try {
       // Use FileSystem to get the base64 encoded image from the URI
@@ -100,7 +94,6 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       return null;
     }
   };
-
 
 
   const handleAnswerChange = (questionId: number, answer: any) => {
@@ -122,7 +115,6 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       setShowImageUploads(false);
     }
   };
-
 
   const handleSubmitSurvey = async () => {
     setLoading(true);
@@ -277,7 +269,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
       } else {
         errorMessage = error.message;
       }
-    
+
       Toast.show({
         type: 'error',
         position: 'top',
@@ -285,7 +277,7 @@ const QuestionnaireScreen = ({ route, navigation }: any) => {
         text2: errorMessage,
         visibilityTime: 3000,
       });
-      
+
     } finally {
       setLoading(false);
     }

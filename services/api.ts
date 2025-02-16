@@ -109,8 +109,8 @@ export const getResultId = (ProjectId: string, surveyId: string, outletName: str
 };
 
 
-export const getSurveyQuestions = (ProjectId: string, surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
-  return api.post('/survey/get-questions', { ProjectId, surveyId });
+export const getSurveyQuestions = (surveyId: string): Promise<AxiosResponse<ApiResponse>> => {
+  return api.get(`/survey/get-questions/${surveyId}`);
 };
 
 export const submitPreSurveyDetails = (surveyData: SubmitSurvey): Promise<AxiosResponse<ApiResponse>> => {
